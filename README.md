@@ -64,3 +64,4 @@ docs/             requirements, architecture, design review, plan, code
 | Code Review | [docs/code-review.md](docs/code-review.md) |
 | Verify | [docs/verification-report.md](docs/verification-report.md) |
 | PR | opened against `main`, see repository Pull Requests tab |
+| Demo walkthrough | [docs/demo-flow.md](docs/demo-flow.md) |
