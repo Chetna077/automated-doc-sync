@@ -23,7 +23,7 @@ output.
 ## Usage
 
 ```
-node src/index.js <repoPath> <templatePath> <outputPath>
+node src/index.js <repoPath> <templatePath> <outputPath> [--json]
 ```
 
 - `repoPath` — a local path to the repository to scan.
@@ -31,6 +31,7 @@ node src/index.js <repoPath> <templatePath> <outputPath>
   [`templates/technical-app-manifest.md`](templates/technical-app-manifest.md)
   for the one this project ships with).
 - `outputPath` — where to write the rendered document.
+- `--json` — print a JSON sync result to stdout instead of the plain-text summary. The output file remains Markdown. Success results contain `status`, `outputPath`, `fields` (`found` and `total`), and the rendered `document`; errors contain `status` and `message` and exit non-zero. The flag can appear anywhere among the arguments.
 
 ## How it decides what's real
 

@@ -34,26 +34,46 @@ function run(repoPath, templatePath, outputPath) {
 }
 
 function main(argv) {
-  const [repoPath, templatePath, outputPath] = argv;
+  const jsonOutput = argv.includes('--json');
+  const [repoPath, templatePath, outputPath] = argv.filter((arg) => arg !== '--json');
   if (!repoPath || !templatePath || !outputPath) {
-    console.error('Usage: doc-sync <repoPath> <templatePath> <outputPath>');
+    const message = 'Usage: doc-sync <repoPath> <templatePath> <outputPath> [--json]';
+    if (jsonOutput) {
+      console.log(JSON.stringify({ status: 'error', message }));
+    } else {
+      console.error(message);
+    }
     process.exitCode = 1;
     return;
   }
 
-  const { placeholders, foundCount } = run(
+  const absoluteOutputPath = path.resolve(outputPath);
+  const { placeholders, foundCount, rendered } = run(
     path.resolve(repoPath),
     path.resolve(templatePath),
-    path.resolve(outputPath),
+    absoluteOutputPath,
   );
-  console.log(`${foundCount} / ${placeholders.length} fields found. Wrote ${outputPath}`);
+  if (jsonOutput) {
+    console.log(JSON.stringify({
+      status: 'success',
+      outputPath: absoluteOutputPath,
+      fields: { found: foundCount, total: placeholders.length },
+      document: rendered,
+    }));
+  } else {
+    console.log(`${foundCount} / ${placeholders.length} fields found. Wrote ${outputPath}`);
+  }
 }
 
 if (require.main === module) {
   try {
     main(process.argv.slice(2));
   } catch (err) {
-    console.error(err.message);
+    if (process.argv.includes('--json')) {
+      console.log(JSON.stringify({ status: 'error', message: err.message }));
+    } else {
+      console.error(err.message);
+    }
     process.exitCode = 1;
   }
 }
