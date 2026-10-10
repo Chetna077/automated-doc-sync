@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "type": "command",
+        "command": "bash .github/hooks/scripts/secret-guard.sh",
+        "windows": "bash .github/hooks/scripts/secret-guard.sh",
+        "timeout": 15
+      }
+    ],
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "bash .github/hooks/scripts/doc-drift-check.sh",
+        "windows": "bash .github/hooks/scripts/doc-drift-check.sh",
+        "timeout": 15
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "bash .github/hooks/scripts/run-tests.sh",
+        "windows": "bash .github/hooks/scripts/run-tests.sh",
+        "timeout": 120
+      }
+    ]
+  }
+}

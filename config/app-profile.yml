@@ -1,0 +1,26 @@
+# Single source of truth for app facts. Agents read this file; they never scan source to guess.
+app:
+  name: automated-doc-sync
+  description: CLI that fills {{Placeholder}} templates from real repo facts; unverifiable values become "Not Found".
+  language: JavaScript (Node.js >= 18)
+  runtime_dependencies: none
+commands:
+  install: "none (zero dependencies)"
+  test: "npm test"
+  self_sync: "npm run sync:self"
+  run: "node src/index.js <repoPath> <templatePath> <outputPath> [--json]"
+modules:
+  - src/templateEngine.js   # parse + render {{Placeholders}}
+  - src/scanner.js          # read real files, report facts
+  - src/factMapper.js       # map facts to placeholders
+  - src/index.js            # CLI wiring
+github:
+  repo: https://github.com/Chetna077/automated-doc-sync
+  main_branch: main
+  feature_branch: feature/automated-doc-sync-mvp
+jira:
+  site: https://chetnadeshwal24.atlassian.net
+  project_key: SCRUM
+confluence:
+  site: https://chetnadeshwal24.atlassian.net/wiki
+docs_dir: docs

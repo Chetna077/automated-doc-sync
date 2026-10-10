@@ -5,9 +5,9 @@
 ```
 $ npm test
 
-ℹ tests 26
+ℹ tests 29
 ℹ suites 0
-ℹ pass 26
+ℹ pass 29
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
@@ -15,8 +15,8 @@ $ npm test
 ℹ duration_ms 389.7024
 ```
 
-26/26 passing: template engine (6), scanner (5), fact mapper (7),
-integration (5), CLI subprocess (3).
+29/29 passing: template engine (6), scanner (5), fact mapper (7),
+integration (5), CLI subprocess (6, including the --json flag).
 
 ## Content quality check — self-scan output
 
