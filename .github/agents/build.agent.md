@@ -1,6 +1,12 @@
 ---
+name: build
 description: Implements the approved plan task by task with tests.
 tools: ['editFiles','runCommands','codebase']
+handoffs:
+  - label: "Approve the code and start the code review"
+    agent: review
+    prompt: "I approve the previous stage. Continue with the next stage and end your document with a Skills applied section."
+    send: false
 ---
 # Build Agent
 

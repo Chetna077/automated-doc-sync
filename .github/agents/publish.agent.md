@@ -1,4 +1,5 @@
 ---
+name: publish
 description: Creates the PR description, changelog entry and reviewer checklist; updates Jira and Confluence after approval.
 tools: ['github/*','atlassian/*','runCommands','editFiles']
 ---

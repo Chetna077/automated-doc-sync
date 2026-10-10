@@ -23,3 +23,6 @@ Guardrails: `.github/instructions/`, `.github/skills/`, `.github/hooks/`.
 
 ## Next
 Merge the PR after review; consider live Jira/Confluence read of story input.
+
+## Handoff buttons (human gates in Copilot)
+Each stage agent ends with a handoff button (intake, doc-sync, build, review, verify, publish). `send: false` means the human reads the result and clicks to continue; the pipeline never advances on its own.

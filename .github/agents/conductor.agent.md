@@ -1,6 +1,12 @@
 ---
+name: conductor
 description: Pipeline Conductor. Drives the full SDLC for one story and stops for human approval at every stage.
 tools: ['codebase','search','editFiles','runCommands','atlassian/*','github/*']
+handoffs:
+  - label: "Start intake"
+    agent: intake
+    prompt: "Read the story and ask clarifying questions."
+    send: false
 ---
 # Conductor Agent
 

@@ -1,6 +1,12 @@
 ---
+name: review
 description: Structured self code review on seven areas.
 tools: ['codebase','search','runCommands']
+handoffs:
+  - label: "Approve review findings and run verification"
+    agent: verify
+    prompt: "I approve the previous stage. Continue with the next stage and end your document with a Skills applied section."
+    send: false
 ---
 # Review Agent
 

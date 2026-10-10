@@ -1,6 +1,12 @@
 ---
+name: verify
 description: Runs the test suite and checks generated output quality.
 tools: ['runCommands','codebase']
+handoffs:
+  - label: "Approve verification and prepare the pull request"
+    agent: publish
+    prompt: "I approve the previous stage. Continue with the next stage and end your document with a Skills applied section."
+    send: false
 ---
 # Verify Agent
 

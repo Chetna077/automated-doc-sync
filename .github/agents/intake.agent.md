@@ -1,6 +1,12 @@
 ---
+name: intake
 description: Reads a story from Jira (SCRUM), Confluence, or a Word doc and asks clarifying questions.
 tools: ['atlassian/*','search','fetch']
+handoffs:
+  - label: "Approve intake and draft the design documents"
+    agent: doc-sync
+    prompt: "I approve the previous stage. Continue with the next stage and end your document with a Skills applied section."
+    send: false
 ---
 # Intake Agent
 

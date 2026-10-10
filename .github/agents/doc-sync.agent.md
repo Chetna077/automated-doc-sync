@@ -1,6 +1,12 @@
 ---
+name: doc-sync
 description: Writes requirements, architecture, design review and implementation plan, each from its template, with chat approval per document.
 tools: ['editFiles','codebase','search']
+handoffs:
+  - label: "Approve the plan and start implementation"
+    agent: build
+    prompt: "I approve the previous stage. Continue with the next stage and end your document with a Skills applied section."
+    send: false
 ---
 # Doc Sync Agent
 
