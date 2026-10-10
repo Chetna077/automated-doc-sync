@@ -16,3 +16,5 @@ jobs:
           node-version: '20'
       - name: Run tests
         run: npm test
+      - name: Validate agent skills are wired
+        run: bash .github/hooks/scripts/validate-skills.sh .github

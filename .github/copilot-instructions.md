@@ -15,3 +15,8 @@ Nothing is committed, pushed, posted to Jira/Confluence, or opened as a PR witho
 
 ## Pipeline
 Use the `/run-pipeline` prompt. The `conductor` agent drives: Intake → Requirements → Architecture → Design Review → Implementation Plan → Implementation → Review → Verify → PR.
+
+## Skills, hooks and MCP
+- **Skills** (`.github/skills/`): `not-found-policy`, `repo-fact-verifier`, `jira-story-readiness`, `code-review-checklist`, `pr-description-writer`. Each agent names the skills it must use. Every SDLC document ends with a `## Skills applied` section listing what each skill checked.
+- **Hooks** (`.github/hooks/hooks.json`): before tool use blocks staged secrets; after tool use warns on doc drift; on stop the tests run and missing `## Skills applied` sections block the run.
+- **MCP** (`.vscode/mcp.json`): `atlassian` for Jira and Confluence, `github` for pull requests. Tokens are prompted, never stored.

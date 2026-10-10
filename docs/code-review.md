@@ -20,3 +20,20 @@ Reviewer: Copilot Chat, acting as peer reviewer over the finished implementation
 One real bug found and fixed (script formatting), one real test-coverage gap
 found and closed (CLI argument path had no direct test). Everything else
 checked out against its own stated requirement.
+
+## Addendum: seven-area re-review (agentic pipeline run)
+
+| Area | Finding | Severity | Resolution |
+|---|---|---|---|
+| Correctness | `run()` did not stop when the output path equalled the template path, so the tool could overwrite its own template. Documentation claimed it was refused. | High | Fixed in `src/index.js`; test `test/overwrite-guard.test.js` proves the template stays unchanged. |
+| Security | User paths are only passed to `fs`, never to a shell. No network calls. Hooks block staged secrets. | Low | Accepted; covered by `test/hooks.test.js`. |
+| Error handling | Missing repo or template throws a clear error; `--json` prints a JSON error. Broken JSON in the scanned repo becomes `Not Found`. | Low | Covered by existing CLI and scanner tests. |
+| Test coverage | Added overwrite-guard and hook tests: 29 to 32 tests. | Info | Done. |
+| Code clarity | Four small modules, one job each. | Info | No change. |
+| DRY | No duplicated logic found. | Info | No change. |
+| Dependency safety | Zero runtime dependencies and no lockfile, so `npm audit` has nothing to scan. | Info | Accepted. |
+
+## Skills applied
+- code-review-checklist: seven areas reviewed; one high-severity gap found and fixed.
+- not-found-policy: confirmed missing or malformed sources return `Not Found`; no change needed.
+- repo-fact-verifier: confirmed facts come from `package.json` and `README.md` only.

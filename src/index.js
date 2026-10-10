@@ -18,6 +18,9 @@ function run(repoPath, templatePath, outputPath) {
   if (!fs.existsSync(templatePath)) {
     throw new Error(`Template not found: ${templatePath}`);
   }
+  if (path.resolve(outputPath) === path.resolve(templatePath)) {
+    throw new Error(`Output path must differ from the template path: ${templatePath}`);
+  }
 
   const templateText = fs.readFileSync(templatePath, 'utf8');
   const { text, placeholders } = parseTemplate(templateText);
