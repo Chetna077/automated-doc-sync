@@ -20,6 +20,33 @@ npm run sync:self
 [`TECHNICAL_PROFILE.md`](TECHNICAL_PROFILE.md) — a live example of its own
 output.
 
+## Agentic SDLC pipeline (GitHub Copilot)
+
+<!-- agentic-pipeline -->
+```mermaid
+flowchart LR
+  P[/run-pipeline SCRUM-n/] --> C{{conductor}}
+  C --> I[intake<br/>Jira / Confluence / Word]
+  I --> D[doc-sync<br/>requirements → architecture → design review → plan]
+  D --> B[build<br/>code + tests]
+  B --> R[review<br/>7-area checklist]
+  R --> V[verify<br/>npm test + output check]
+  V --> U[publish<br/>PR + changelog + Jira + Confluence]
+  H((Human approval)) -.-> I & D & B & R & V & U
+```
+
+| Layer | Where | Purpose |
+|---|---|---|
+| Agents | `.github/agents/` | One agent per SDLC stage, driven by `conductor` |
+| Prompt | `.github/prompts/run-pipeline.prompt.md` | One-command start |
+| Instructions | `.github/copilot-instructions.md`, `.github/instructions/` | Always-on rules and file-scoped rules |
+| Skills | `.github/skills/` | `not-found-policy`, `repo-fact-verifier` |
+| Hooks | `.github/hooks/hooks.json` | Before: secret guard · After: doc-drift check · Stop: run tests |
+| MCP | `.vscode/mcp.json` | Atlassian (Jira, Confluence) and GitHub |
+| Config | `config/app-profile.yml` | Single source of app facts |
+
+Traceability: `docs/trace-log.md` · Handoff: `docs/handoff.md`
+
 ## Usage
 
 ```
