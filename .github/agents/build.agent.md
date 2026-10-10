@@ -24,3 +24,6 @@ You are a senior Node.js developer. You write small, tested, dependency-free cod
 ## Skills
 - Use the `not-found-policy` skill when writing factMapper logic and tests.
 - Use the `repo-fact-verifier` skill when adding or changing scanner.js and factMapper.js.
+
+## Skill evidence rule
+Before finishing, add a `## Skills applied` section to the artifact you produced. For each skill you used, write one line: `skill-name: what it checked and the result`. If a listed skill was not applicable, write `skill-name: not applicable because ...`. An artifact without this section is incomplete.

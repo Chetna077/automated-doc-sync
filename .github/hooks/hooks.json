@@ -22,6 +22,12 @@
         "command": "bash .github/hooks/scripts/run-tests.sh",
         "windows": "bash .github/hooks/scripts/run-tests.sh",
         "timeout": 120
+      },
+      {
+        "type": "command",
+        "command": "bash .github/hooks/scripts/check-skills-applied.sh docs",
+        "windows": "bash .github/hooks/scripts/check-skills-applied.sh docs",
+        "timeout": 15
       }
     ],
     "SessionStart": [
