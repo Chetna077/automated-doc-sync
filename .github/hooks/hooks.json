@@ -23,6 +23,14 @@
         "windows": "bash .github/hooks/scripts/run-tests.sh",
         "timeout": 120
       }
+    ],
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "bash .github/hooks/scripts/validate-skills.sh .github",
+        "windows": "bash .github/hooks/scripts/validate-skills.sh .github",
+        "timeout": 15
+      }
     ]
   }
 }

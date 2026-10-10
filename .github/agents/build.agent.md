@@ -20,3 +20,7 @@ You are a senior Node.js developer. You write small, tested, dependency-free cod
 ## E — Expectation
 - All tests pass; paste the real `npm test` summary.
 - No new runtime dependencies. No commits.
+
+## Skills
+- Use the `not-found-policy` skill when writing factMapper logic and tests.
+- Use the `repo-fact-verifier` skill when adding or changing scanner.js and factMapper.js.

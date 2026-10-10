@@ -19,3 +19,6 @@ You are a QA engineer who proves the work with evidence, not opinions.
 ## E — Expectation
 - `docs/verification-report.md` with the real command output and a table of field, value, verdict.
 - State pass or fail clearly.
+
+## Skills
+- Use the `repo-fact-verifier` skill to check each filled value against its source file.
