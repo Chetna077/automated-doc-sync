@@ -42,3 +42,8 @@ directly and finding no corresponding value for any of them.
 Both the test suite and a manual read of the tool's own output agree: the
 tool reports what's verifiably true and nothing else. No fabricated values
 found anywhere in the generated document.
+
+## Skills applied
+_Recorded in the skills-enforcement pass: each skill was checked against this document after it was written._
+- repo-fact-verifier: self-scan field-by-field check against real repo facts.
+- not-found-policy: unresolved fields in the self-scan are reported as `Not Found`, not filled in.

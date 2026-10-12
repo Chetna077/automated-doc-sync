@@ -22,3 +22,8 @@ facts instead of throwing, and the fact-mapper section explains why the
 lookup-table approach was kept over a generic one.
 
 No blocking issues. Proceeding to implementation planning.
+
+## Skills applied
+_Recorded in the skills-enforcement pass: each skill was checked against this document after it was written._
+- code-review-checklist: design findings rated by severity and each given a resolution.
+- not-found-policy: generic fact mapper rejected because it could invent values.

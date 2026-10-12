@@ -49,3 +49,8 @@ picking this up mid-way.
   `requirements.md`).
 - A recursive/glob-based entry-point search (accepted limitation, see
   `design-review.md` finding #6).
+
+## Skills applied
+_Recorded in the skills-enforcement pass: each skill was checked against this document after it was written._
+- jira-story-readiness: tasks ordered by dependency and traceable to requirements.
+- code-review-checklist: test tasks planned for happy path and Not Found edge cases.
