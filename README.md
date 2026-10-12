@@ -41,7 +41,7 @@ flowchart LR
 | Prompt | `.github/prompts/run-pipeline.prompt.md` | One-command start |
 | Instructions | `.github/copilot-instructions.md`, `.github/instructions/` | Always-on rules and file-scoped rules |
 | Skills | `.github/skills/` | `not-found-policy`, `repo-fact-verifier` |
-| Hooks | `.github/hooks/hooks.json` | Before: secret guard · After: doc-drift check · Stop: run tests |
+| Hooks | `.github/hooks/hooks.json` | Before: secret guard · After: doc-drift check · Stop: run tests (via `run-hook.js` launcher, works on Windows) |
 | MCP | `.vscode/mcp.json` | Atlassian (Jira, Confluence) and GitHub |
 | Config | `config/app-profile.yml` | Single source of app facts |
 

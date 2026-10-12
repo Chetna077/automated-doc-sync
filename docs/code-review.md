@@ -28,7 +28,7 @@ checked out against its own stated requirement.
 | Correctness | `run()` did not stop when the output path equalled the template path, so the tool could overwrite its own template. Documentation claimed it was refused. | High | Fixed in `src/index.js`; test `test/overwrite-guard.test.js` proves the template stays unchanged. |
 | Security | User paths are only passed to `fs`, never to a shell. No network calls. Hooks block staged secrets. | Low | Accepted; covered by `test/hooks.test.js`. |
 | Error handling | Missing repo or template throws a clear error; `--json` prints a JSON error. Broken JSON in the scanned repo becomes `Not Found`. | Low | Covered by existing CLI and scanner tests. |
-| Test coverage | Added overwrite-guard and hook tests: 29 to 32 tests. | Info | Done. |
+| Test coverage | Added overwrite-guard and hook tests: 29 to 34 tests; hooks.json rewritten in the Copilot hook format with a launcher that never blocks on a broken hook. | Info | Done. |
 | Code clarity | Four small modules, one job each. | Info | No change. |
 | DRY | No duplicated logic found. | Info | No change. |
 | Dependency safety | Zero runtime dependencies and no lockfile, so `npm audit` has nothing to scan. | Info | Accepted. |

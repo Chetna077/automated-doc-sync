@@ -1,7 +1,7 @@
 # Handoff — automated-doc-sync (Copilot)
 
 ## State
-- Branch: `feature/automated-doc-sync-mvp`. Tests: 32/32 passing. Zero runtime dependencies.
+- Branch: `feature/automated-doc-sync-mvp`. Tests: 34/34 passing. Zero runtime dependencies.
 - Artifacts: requirements, architecture, design-review, impl-plan, code-review, verification-report, demo-flow, trace-log.
 
 ## How to run
