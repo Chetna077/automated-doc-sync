@@ -48,7 +48,7 @@ The AI agents draft each artifact. A human reviews and decides at every gate. No
 | Implementation plan | [x] Chetna Deshwal | 2026-10-12 (approved in Copilot chat gate) |
 | Code and tests | [x] Chetna Deshwal | 2026-10-12 (implementation approved in Copilot chat gate) |
 | Code review and verification | [x] Chetna Deshwal | 2026-10-13 (each stage approved in chat after findings were shown) |
-| Pull request | [ ] Chetna Deshwal | |
+| Pull request | [x] Chetna Deshwal | 2026-10-13 (PR description approved in chat; opening the PR is still to do after the push) |
 
 ## SCRUM-1 run notes
 
@@ -61,5 +61,5 @@ The AI agents draft each artifact. A human reviews and decides at every gate. No
 |---|---|---|---|
 | Review | Completed, findings in `docs/code-review.md` | Claude | Approved by Chetna 2026-10-13 |
 | Verification | Completed, two corrections made, see `docs/verification-report.md` | Claude | Approved by Chetna 2026-10-13 |
-| PR description | Completed, text in `docs/pr-description.md` | Claude | Chetna approval |
-| Push | Not started | | |
+| PR description | Completed, text in `docs/pr-description.md` | Claude | Approved by Chetna 2026-10-13 |
+| Push | Blocked in the Claude sandbox (HTTP 403 from the proxy); run from your terminal | Chetna | `git push -u origin HEAD` |
