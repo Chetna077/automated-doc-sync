@@ -54,3 +54,12 @@ The AI agents draft each artifact. A human reviews and decides at every gate. No
 
 - Intake, requirements, architecture, design review, implementation plan and implementation ran through the Copilot `conductor` pipeline, each stopping for human approval.
 - The session ended with a network timeout (408) before the code review stage. The code review and verification entries above were written by Claude from the saved files and are awaiting human review. The reviewer sign-off boxes stay unticked until a person ticks them.
+
+## Stage log (requested 13 Oct 2026)
+
+| Stage | Status | Done by | Awaiting |
+|---|---|---|---|
+| Review | Completed, findings in `docs/code-review.md` | Claude | Chetna approval, then tick "Code review and verification" |
+| Verification | Not started | | |
+| PR description | Not started | | |
+| Push | Not started | | |

@@ -49,6 +49,23 @@ Reviewed `src/scanner.js` and the changed tests against requirements FR-2, FR-3 
 
 Open items from the design review that stay open on purpose: the exact JSON error shape (DR-2) and the missing-template message text (DR-4).
 
+## SCRUM-1 review findings (checklist pass over all changed files)
+
+Files reviewed: `src/scanner.js`, `src/index.js`, `src/factMapper.js`, `test/*.test.js`, `.github/hooks/hooks.json`, `.github/hooks/scripts/*`, `.vscode/mcp.json`, `config/app-profile.yml`. No high-severity defect found.
+
+| ID | Area | Finding | Severity | Recommended action |
+|---|---|---|---|---|
+| R-1 | Error handling | A missing template or repo path throws the raw Node error (for example ENOENT). The message text is still undefined (DR-4). | Medium | Accept for this story; list under Known Limitations. |
+| R-2 | Security | If Git Bash is not installed, `run-hook.js` skips every hook with a warning, so the secret guard is off on that machine. | Medium | Accept; documented in the README and the launcher message. |
+| R-3 | Security | The secret guard scans only staged changes, not files an agent has just written. | Low | Accept; it blocks at commit time. |
+| R-4 | Correctness | `doc-drift-check.sh` uses `find -printf` (GNU only). On macOS it prints "up to date" without checking. | Low | Accept; hooks target Windows and Linux with Git Bash. |
+| R-5 | Error handling | The README is read in full with no size limit. | Low | Accept. |
+| R-6 | Test coverage | The unreadable README is covered (a directory named `README.md`), and broken JSON is covered. An unreadable `package.json` is not tested separately. | Low | Optional extra test. |
+| R-7 | Code clarity / DRY | `factMapper.js` rules are explicit and repetitive on purpose (see architecture). No duplication worth extracting. | Info | None. |
+| R-8 | Dependency safety | Zero runtime dependencies, no lockfile, so `npm audit` has nothing to scan. | Info | None. |
+
+Required fixes before the PR: none. Items R-1, R-2 and R-4 go into Known Limitations.
+
 ## Skills applied
 - code-review-checklist: seven areas reviewed; one high-severity gap found and fixed.
 - not-found-policy: confirmed missing or malformed sources return `Not Found`; no change needed.
