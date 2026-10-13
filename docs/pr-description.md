@@ -1,43 +1,47 @@
 # SCRUM-1: Automated Documentation Sync CLI + Copilot agentic pipeline
 
 ## Summary
-Adds a zero-dependency Node.js CLI that fills `{{Placeholder}}` templates from facts verified in a real repo and writes `Not Found` for anything unverifiable. Delivered through a GitHub Copilot agentic SDLC pipeline (agents, prompt, instructions, skills, hooks, MCP) with a human approval at every stage.
+Adds a zero-dependency Node.js CLI that fills `{{Placeholder}}` templates from facts verified in a real repository (`package.json`, `README.md` and known entrypoint files) and writes the exact text `Not Found` for anything it cannot verify. The work was delivered through a GitHub Copilot agentic SDLC pipeline (agents, prompt, instructions, skills, hooks, MCP) with a human approval at every stage.
 
 ## Changes Made
-- `src/templateEngine.js`, `scanner.js`, `factMapper.js`, `index.js` — the four-module CLI incl. `--json` flag.
-- `test/*.test.js` + fixtures — 34 tests incl. Not Found and broken-JSON edge cases.
-- `.github/agents/*` (7, RISE format, with handoff buttons so a human approves each stage), `.github/prompts/run-pipeline.prompt.md` — pipeline driven by `conductor`.
-- `.github/copilot-instructions.md`, `.github/instructions/*`, `.github/skills/*` (5 skills; every document ends with a `## Skills applied` section) — guardrails.
-- `.github/hooks/*` — before: secret guard; after: doc-drift check; stop: run tests and block documents missing `## Skills applied`.
-- `.vscode/mcp.json` — Atlassian + GitHub MCP servers; `config/app-profile.yml` — app facts.
-- `docs/` — requirements, architecture, design-review, impl-plan, code-review, verification-report, trace-log, handoff, demo-flow.
-- `CHANGELOG.md`, `.github/workflows/ci.yml` (also validates skill wiring).
-- `src/index.js` + `test/overwrite-guard.test.js` — refuses to write over the template (found by the review agent, fixed with a test).
-- `src/scanner.js` — unreadable or missing README and `package.json` give `Not Found` instead of crashing; entrypoint lookup is an ordered, existence-only allowlist (SCRUM-1 pipeline run, approved at each stage).
-- `.github/hooks/hooks.json` + `scripts/run-hook.js` — Copilot hook format; launcher works on Windows and never blocks on a broken hook.
-- `test/hooks.test.js` — proves the secret-guard hook blocks a staged token, the skills validator passes, the launcher never blocks on a broken hook, and hooks.json is in the Copilot hook format.
+- `src/templateEngine.js`, `scanner.js`, `factMapper.js`, `index.js`: the four-module CLI, including the `--json` flag.
+- `src/scanner.js` (SCRUM-1): a missing or unreadable README or `package.json` returns no fact, so the field renders `Not Found` instead of crashing. Entrypoint lookup is an ordered, existence-only allowlist: `backend/src/server.js`, `src/index.js`, `index.js`, `server.js`, `app.js`.
+- `src/index.js` and `test/overwrite-guard.test.js`: the tool refuses to write over its own template.
+- `test/*.test.js` and fixtures: 34 tests, including Not Found, broken-JSON, unreadable-README and entrypoint-priority cases.
+- `.github/agents/*` (7, RISE format, with handoff buttons so a human approves each stage) and `.github/prompts/run-pipeline.prompt.md`.
+- `.github/copilot-instructions.md`, `.github/instructions/*` (3) and `.github/skills/*` (5). SDLC documents end with a `## Skills applied` section.
+- `.github/hooks/hooks.json` in the Copilot hook format, plus `scripts/run-hook.js`, a launcher that works on Windows and never blocks on a broken hook. Hooks: before = secret guard, after = doc-drift check, stop = run tests and check `## Skills applied`, session start = validate skills.
+- `.vscode/mcp.json`: Atlassian (v2 endpoint) and GitHub MCP servers. `config/app-profile.yml`: app facts.
+- `docs/`: requirements, architecture, design review, implementation plan, code review, verification report, trace log, handoff, demo flow.
+- `CHANGELOG.md` and `.github/workflows/ci.yml` (CI also validates skill wiring).
 
 ## Test Evidence
 ```
 $ npm test
-ℹ tests 34   ℹ pass 34   ℹ fail 0
+# tests 34
+# pass 34
+# fail 0
+# skipped 0
+$ npm run sync:self
+8 / 15 fields found. Wrote TECHNICAL_PROFILE.md
 ```
-Details: `docs/verification-report.md`. Self-scan: 8 of 15 placeholders resolved from real facts; 7 honest `Not Found`.
-
-## Pipeline Evidence
-SCRUM-1 ran through the Copilot `conductor` with human approval at intake, requirements, architecture, design review, plan and implementation. The code review and verification entries were written afterwards by Claude (the Copilot session timed out) and are marked in `docs/trace-log.md`.
+Details and the list of facts checked: `docs/verification-report.md`. Review findings: `docs/code-review.md`.
 
 ## Known Limitations
-- Only `package.json` and `README.md` facts are supported; others render `Not Found`.
-- GitHub MCP needs a token entered at first start.
-- No live Jira/Confluence write in CI.
+- Only `package.json`, `README.md` and the five known entrypoint files are read. Other facts render `Not Found` (7 of the 15 fields in the self-scan).
+- The wording of the missing-template and missing-repo errors is not fixed by the requirements (DR-4). The JSON error shape is limited to the minimum in AC-4 (DR-2).
+- Without Git Bash installed, the hook launcher skips the hooks with a warning, so the secret guard is off on that machine (R-2).
+- `doc-drift-check.sh` uses GNU `find -printf`, so it does not work on macOS (R-4).
+- GitHub MCP needs a token entered at first start. No live Jira or Confluence write runs in CI.
 
 ## Reviewer Checklist
-- [ ] `npm test` passes locally (expect 34/34)
-- [ ] `npm run sync:self` produces `TECHNICAL_PROFILE.md`
-- [ ] No secrets in the diff (hook `secret-guard.sh` clean)
-- [ ] `docs/` matches the code (hook `doc-drift-check.sh` clean)
-- [ ] Not Found cases covered by tests
+- [ ] `npm test` passes locally (expect 34 of 34, 0 skipped)
+- [ ] `npm run sync:self` reports 8 / 15 fields found
+- [ ] No secrets in the diff (`secret-guard.sh` clean)
+- [ ] `docs/` matches the code (`doc-drift-check.sh` clean)
+- [ ] Every SDLC document ends with `## Skills applied`
+- [ ] Not Found cases are covered by tests
+- [ ] `docs/trace-log.md` sign-offs match the approvals you saw
 
 ## Skills applied
 - pr-description-writer: five required sections in order, written only from facts checked in `docs/verification-report.md`.
