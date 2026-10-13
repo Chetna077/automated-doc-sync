@@ -5,9 +5,9 @@
 ```
 $ npm test
 
-ℹ tests 34
+ℹ tests 40
 ℹ suites 0
-ℹ pass 34
+ℹ pass 40
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
@@ -15,9 +15,7 @@ $ npm test
 ℹ duration_ms 389.7024
 ```
 
-34/34 passing: template engine (6), scanner (5), fact mapper (7),
-integration (5), CLI subprocess (6, including the --json flag),
-overwrite guard (1), hooks and launcher (4).
+40/40 passing: see the per-file counts in the table below.
 
 ## Content quality check — self-scan output
 
@@ -55,7 +53,7 @@ _Recorded in the skills-enforcement pass: each skill was checked against this do
 
 | Claim | Source checked | Result |
 |---|---|---|
-| 34 tests, 34 pass, 0 skipped | `node --test test/*.test.js` | Verified |
+| 40 tests, 40 pass, 0 skipped | `node --test test/*.test.js` | Verified |
 | Per-file tests: cli 6, factMapper 7, hooks 4, integration 5, overwrite-guard 1, scanner 5, templateEngine 6 | `grep -c "^test("` per file | Verified (sum 34) |
 | Zero runtime and dev dependencies; Node >=18 | `package.json` | Verified |
 | Self-scan finds 8 of 15 fields, 7 are `Not Found` | `npm run sync:self`, `--json` output (`found 8, total 15`) | Verified |
@@ -66,7 +64,7 @@ _Recorded in the skills-enforcement pass: each skill was checked against this do
 
 Corrections made: the test breakdown above listed 29 tests and left out the overwrite guard and hook tests; and the first code review draft wrongly said a missing template gives a raw ENOENT error (see R-1).
 
-- `npm test`: 34 tests, 34 pass, 0 fail, 0 skipped (AC-8).
+- `npm test`: 40 tests, 40 pass, 0 fail, 0 skipped (AC-8).
 - `npm run sync:self`: `8 / 15 fields found. Wrote TECHNICAL_PROFILE.md` (AC-7).
 - Entrypoint order, no-candidate case, unreadable README and broken `package.json` are covered by tests (AC-2, AC-6).
 - Runtime dependencies: none. Node.js >=18.
@@ -75,3 +73,12 @@ Corrections made: the test breakdown above listed 29 tests and left out the over
 ## Skills applied (SCRUM-1)
 - repo-fact-verifier: self-scan facts checked against `package.json` and `README.md`; 7 unresolved fields remain `Not Found`.
 - not-found-policy: every unverifiable field is exactly `Not Found`.
+
+### After the approved review fixes (C-1, C-2, C-3, S-1)
+
+- Prototype-name placeholders (`__proto__`, `constructor`, `toString`) render `Not Found` and count as 0 found. Reproduced before and after.
+- Empty metadata renders `Not Found` and is not counted as found.
+- A directory at an entrypoint candidate path is not reported as an entrypoint.
+- Writing through a hard link to the template is refused and the template stays unchanged.
+- One extra defect was found while verifying: the found-count still read inherited properties. Fixed in `src/index.js` with a regression test.
+- `npm test`: 40 tests, 40 pass, 0 fail, 0 skipped. `npm run sync:self`: 8 / 15 fields found.

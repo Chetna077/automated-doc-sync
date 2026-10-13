@@ -11,6 +11,20 @@ function today() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function isSameFile(firstPath, secondPath) {
+  let secondStat;
+  try {
+    secondStat = fs.statSync(secondPath);
+  } catch (err) {
+    if (err.code === 'ENOENT' || err.code === 'ENOTDIR') {
+      return false;
+    }
+    throw err;
+  }
+  const firstStat = fs.statSync(firstPath);
+  return firstStat.dev === secondStat.dev && firstStat.ino === secondStat.ino;
+}
+
 function run(repoPath, templatePath, outputPath) {
   if (!fs.existsSync(repoPath)) {
     throw new Error(`Repo not found: ${repoPath}`);
@@ -18,7 +32,8 @@ function run(repoPath, templatePath, outputPath) {
   if (!fs.existsSync(templatePath)) {
     throw new Error(`Template not found: ${templatePath}`);
   }
-  if (path.resolve(outputPath) === path.resolve(templatePath)) {
+  if (path.resolve(outputPath) === path.resolve(templatePath)
+    || isSameFile(templatePath, outputPath)) {
     throw new Error(`Output path must differ from the template path: ${templatePath}`);
   }
 
@@ -32,7 +47,13 @@ function run(repoPath, templatePath, outputPath) {
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   fs.writeFileSync(outputPath, rendered, 'utf8');
 
-  const foundCount = placeholders.filter((name) => values[name] !== undefined).length;
+  const foundCount = placeholders.filter((name) => {
+    // Own keys only: names like constructor or toString must never count as found.
+    if (!Object.prototype.hasOwnProperty.call(values, name)) return false;
+    const value = values[name];
+    return value !== undefined && value !== null
+      && !(typeof value === 'string' && value.trim() === '');
+  }).length;
   return { placeholders, foundCount, rendered };
 }
 

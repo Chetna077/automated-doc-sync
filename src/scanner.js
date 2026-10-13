@@ -47,9 +47,14 @@ function readReadmeSummary(repoPath) {
 
 function findEntryPoint(repoPath) {
   for (const candidate of ENTRY_POINT_CANDIDATES) {
-    // Deliberately check only existence: candidate source is never opened or run.
-    if (fs.existsSync(path.join(repoPath, candidate))) {
-      return candidate;
+    const candidatePath = path.join(repoPath, candidate);
+    try {
+      // Stat the candidate without reading it; only regular files are entrypoints.
+      if (fs.statSync(candidatePath).isFile()) {
+        return candidate;
+      }
+    } catch {
+      // Missing or unreadable candidates do not block later allowlist entries.
     }
   }
   return null;

@@ -47,6 +47,21 @@ test('CLI end-to-end: a field genuinely absent from the repo is marked Not Found
     'Name: Not Found | Entry: Not Found');
 });
 
+test('run counts empty metadata as Not Found rather than found', () => {
+  const repo = fs.mkdtempSync(path.join(os.tmpdir(), 'doc-sync-empty-metadata-'));
+  const template = path.join(repo, 'template.md');
+  const output = path.join(repo, 'profile.md');
+  fs.writeFileSync(path.join(repo, 'package.json'), JSON.stringify({
+    name: '',
+    author: '   ',
+  }));
+  fs.writeFileSync(template, 'Name: {{App_Name}} | Maintainers: {{Maintainers}}');
+
+  const result = run(repo, template, output);
+  assert.equal(result.rendered, 'Name: Not Found | Maintainers: Not Found');
+  assert.equal(result.foundCount, 0);
+});
+
 test('CLI is deterministic run-to-run, aside from the Last Synced line', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'doc-sync-out-'));
   const first = run(FIXTURE_REPO, TEMPLATE, path.join(dir, 'first.md'));
@@ -63,4 +78,13 @@ test('run() throws a clear error for a repo path that does not exist', () => {
 test('run() throws a clear error for a template path that does not exist', () => {
   const outputPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'doc-sync-out-')), 'PROFILE.md');
   assert.throws(() => run(FIXTURE_REPO, '/no/such/template.md', outputPath), /Template not found/);
+});
+
+test('special placeholder names render Not Found and are not counted as found', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'doc-sync-special-'));
+  const template = path.join(dir, 'template.md');
+  fs.writeFileSync(template, 'A={{__proto__}} B={{constructor}} C={{toString}}\n');
+  const result = run(FIXTURE_REPO, template, path.join(dir, 'out.md'));
+  assert.equal(result.rendered, 'A=Not Found B=Not Found C=Not Found\n');
+  assert.equal(result.foundCount, 0);
 });

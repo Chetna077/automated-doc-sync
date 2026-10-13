@@ -46,10 +46,30 @@ test('mapFacts omits a placeholder with no rule instead of guessing', () => {
   assert.equal(Object.prototype.hasOwnProperty.call(values, 'Something_Nobody_Defined'), false);
 });
 
+test('mapFacts treats prototype property names as unsupported placeholders', () => {
+  const placeholders = ['__proto__', 'constructor', 'toString'];
+  const values = mapFacts(SAMPLE_FACTS, placeholders);
+
+  assert.deepEqual(values, {});
+  const { renderTemplate } = require('../src/templateEngine');
+  assert.equal(renderTemplate(placeholders.map((name) => `{{${name}}}`).join('|'), values),
+    placeholders.map(() => 'Not Found').join('|'));
+});
+
 test('mapFacts omits a placeholder whose rule finds nothing in these facts', () => {
   // The fixture has no "build" script, so Build_Tool must not be invented.
   const values = mapFacts(SAMPLE_FACTS, ['Build_Tool']);
   assert.equal(Object.prototype.hasOwnProperty.call(values, 'Build_Tool'), false);
+});
+
+test('mapFacts omits empty or whitespace-only source values', () => {
+  const values = mapFacts({
+    pkg: { name: '', author: '   ' },
+    readmeSummary: null,
+    entryPoint: null,
+  }, ['App_Name', 'Maintainers']);
+
+  assert.deepEqual(values, {});
 });
 
 test('mapFacts handles a facts object with a null pkg without throwing', () => {

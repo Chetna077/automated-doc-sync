@@ -48,6 +48,15 @@ test('scanRepo finds entrypoints only from the approved ordered allowlist', () =
   assert.equal(scanRepo(repoWithAllCandidates).entryPoint, ENTRY_POINT_CANDIDATES[0]);
 });
 
+test('scanRepo skips directories named like entrypoint candidates', () => {
+  const repo = fs.mkdtempSync(path.join(os.tmpdir(), 'doc-sync-entrypoint-dir-'));
+  fs.mkdirSync(path.join(repo, 'backend', 'src', 'server.js'), { recursive: true });
+  fs.mkdirSync(path.join(repo, 'src'), { recursive: true });
+  fs.writeFileSync(path.join(repo, 'src', 'index.js'), 'candidate');
+
+  assert.equal(scanRepo(repo).entryPoint, 'src/index.js');
+});
+
 test('scanRepo returns nulls, not errors, for a repo with nothing to scan', () => {
   const emptyRepo = fs.mkdtempSync(path.join(os.tmpdir(), 'doc-sync-empty-'));
   const facts = scanRepo(emptyRepo);

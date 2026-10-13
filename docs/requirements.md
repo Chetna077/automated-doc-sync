@@ -17,7 +17,7 @@ As a developer or tech lead, I want a local CLI to fill a project's technical pr
 
 - **NFR-1 - Local-only operation.** Application operation must not require network access, credentials, or remote service calls. (Approved intake scope; local CLI command in `config/app-profile.yml`.)
 - **NFR-2 - No runtime dependencies; supported runtime.** Keep runtime dependencies at zero and support Node.js >=18. (`config/app-profile.yml`.)
-- **NFR-3 - Verifiable behavior.** `npm test` must complete with 34 tests passing and zero failures as stated in the approved intake; all SDLC documents must include a `## Skills applied` section. (Acceptance criterion: AC-8; test command in `config/app-profile.yml`; documentation rule in `.github/instructions/docs.instructions.md`.)
+- **NFR-3 - Verifiable behavior.** `npm test` must complete with 40 tests passing and zero failures (34 at intake; 6 regression tests were added by the approved review fixes) intake; all SDLC documents must include a `## Skills applied` section. (Acceptance criterion: AC-8; test command in `config/app-profile.yml`; documentation rule in `.github/instructions/docs.instructions.md`.)
 
 ## Open Questions
 
@@ -36,7 +36,7 @@ Jira: [SCRUM-1](https://chetnadeshwal24.atlassian.net/browse/SCRUM-1) - Confluen
 - **AC-5:** Identical template and output paths are rejected with `Output path must differ from the template path: <templatePath>`; the template is not overwritten and the CLI exits 1.
 - **AC-6:** Missing or invalid `package.json` does not crash; affected fields are `Not Found`, and the CLI exits 0.
 - **AC-7:** `npm run sync:self` generates `TECHNICAL_PROFILE.md` with 8 / 15 fields found.
-- **AC-8:** `npm test` passes 34 tests with 0 failures; the project has no runtime dependencies and requires Node.js >=18.
+- **AC-8:** `npm test` passes 40 tests (34 at intake plus 6 regression tests from the approved review fixes) with 0 failures; the project has no runtime dependencies and requires Node.js >=18.
 
 ## Skills applied
 

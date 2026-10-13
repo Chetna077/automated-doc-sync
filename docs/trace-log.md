@@ -18,7 +18,7 @@ Each SDLC step, its artifact, its commit, and who approved it.
 ## Tool events
 - Hooks fired: `secret-guard.sh` (before tool use), `doc-drift-check.sh` (after tool use), `run-tests.sh` (on stop).
 - MCP servers: `atlassian` (Jira SCRUM, Confluence), `github` (PR).
-- Test evidence: `npm test` → 34 pass, 0 fail.
+- Test evidence: `npm test` → 40 pass, 0 fail.
 
 ## Human-in-the-loop checkpoints
 

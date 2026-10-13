@@ -29,8 +29,14 @@ function parseTemplate(text) {
  */
 function renderTemplate(text, values) {
   return text.replace(PLACEHOLDER_PATTERN, (_match, name) => {
+    if (!Object.prototype.hasOwnProperty.call(values, name)) {
+      return 'Not Found';
+    }
     const value = values[name];
-    return value === undefined || value === null || value === '' ? 'Not Found' : String(value);
+    return value === undefined || value === null
+      || (typeof value === 'string' && value.trim() === '')
+      ? 'Not Found'
+      : String(value);
   });
 }
 

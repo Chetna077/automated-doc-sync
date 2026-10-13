@@ -7,7 +7,7 @@ Adds a zero-dependency Node.js CLI that fills `{{Placeholder}}` templates from f
 - `src/templateEngine.js`, `scanner.js`, `factMapper.js`, `index.js`: the four-module CLI, including the `--json` flag.
 - `src/scanner.js` (SCRUM-1): a missing or unreadable README or `package.json` returns no fact, so the field renders `Not Found` instead of crashing. Entrypoint lookup is an ordered, existence-only allowlist: `backend/src/server.js`, `src/index.js`, `index.js`, `server.js`, `app.js`.
 - `src/index.js` and `test/overwrite-guard.test.js`: the tool refuses to write over its own template.
-- `test/*.test.js` and fixtures: 34 tests, including Not Found, broken-JSON, unreadable-README and entrypoint-priority cases.
+- `test/*.test.js` and fixtures: 40 tests, including Not Found, broken-JSON, unreadable-README, entrypoint-priority, special-name, empty-fact and hard-link cases.
 - `.github/agents/*` (7, RISE format, with handoff buttons so a human approves each stage) and `.github/prompts/run-pipeline.prompt.md`.
 - `.github/copilot-instructions.md`, `.github/instructions/*` (3) and `.github/skills/*` (5). SDLC documents end with a `## Skills applied` section.
 - `.github/hooks/hooks.json` in the Copilot hook format, plus `scripts/run-hook.js`, a launcher that works on Windows and never blocks on a broken hook. Hooks: before = secret guard, after = doc-drift check, stop = run tests and check `## Skills applied`, session start = validate skills.
@@ -18,8 +18,8 @@ Adds a zero-dependency Node.js CLI that fills `{{Placeholder}}` templates from f
 ## Test Evidence
 ```
 $ npm test
-# tests 34
-# pass 34
+# tests 40
+# pass 40
 # fail 0
 # skipped 0
 $ npm run sync:self
@@ -35,7 +35,7 @@ Details and the list of facts checked: `docs/verification-report.md`. Review fin
 - GitHub MCP needs a token entered at first start. No live Jira or Confluence write runs in CI.
 
 ## Reviewer Checklist
-- [ ] `npm test` passes locally (expect 34 of 34, 0 skipped)
+- [ ] `npm test` passes locally (expect 40 of 40, 0 skipped)
 - [ ] `npm run sync:self` reports 8 / 15 fields found
 - [ ] No secrets in the diff (`secret-guard.sh` clean)
 - [ ] `docs/` matches the code (`doc-drift-check.sh` clean)

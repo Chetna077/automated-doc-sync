@@ -83,9 +83,13 @@ const RULES = {
 function mapFacts(facts, placeholders) {
   const values = {};
   for (const name of placeholders) {
+    if (!Object.prototype.hasOwnProperty.call(RULES, name)) {
+      continue;
+    }
     const rule = RULES[name];
-    const value = rule ? rule(facts) : null;
-    if (value !== null && value !== undefined) {
+    const value = rule(facts);
+    if (value !== null && value !== undefined
+      && !(typeof value === 'string' && value.trim() === '')) {
       values[name] = value;
     }
   }
