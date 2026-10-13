@@ -59,4 +59,12 @@ test('mapFacts handles a facts object with a null pkg without throwing', () => {
     'Primary_Database',
   ]);
   assert.deepEqual(values, {});
+
+  const placeholders = Object.keys(require('../src/factMapper').RULES);
+  const names = [...placeholders, 'Unregistered_Field'];
+  const allMissing = mapFacts({ pkg: null, readmeSummary: null, entryPoint: null }, names);
+  assert.deepEqual(allMissing, {});
+  const { renderTemplate } = require('../src/templateEngine');
+  const template = names.map((name) => '{{' + name + '}}').join('|');
+  assert.equal(renderTemplate(template, allMissing), names.map(() => 'Not Found').join('|'));
 });

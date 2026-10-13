@@ -10,7 +10,9 @@ const { spawnSync } = require('node:child_process');
 const root = path.resolve(__dirname, '..');
 const guard = path.join(root, '.github/hooks/scripts/secret-guard.sh');
 const validator = path.join(root, '.github/hooks/scripts/validate-skills.sh');
-const hasBash = spawnSync('bash', ['-c', 'true']).status === 0;
+// Find bash the same way the hook launcher does. On Windows a bare 'bash' can be a broken WSL stub.
+const BASH = require('../.github/hooks/scripts/run-hook.js').findBash();
+const hasBash = Boolean(BASH) && spawnSync(BASH, ['-c', 'true']).status === 0;
 
 function git(cwd, ...args) { return spawnSync('git', args, { cwd, encoding: 'utf8' }); }
 
@@ -19,16 +21,16 @@ test('before hook blocks a staged secret (exit 2) and passes when clean', { skip
   git(dir, 'init');
   fs.writeFileSync(path.join(dir, 'ok.txt'), 'hello\n');
   git(dir, 'add', 'ok.txt');
-  assert.strictEqual(spawnSync('bash', [guard], { cwd: dir }).status, 0);
+  assert.strictEqual(spawnSync(BASH, [guard], { cwd: dir }).status, 0);
   fs.writeFileSync(path.join(dir, 'leak.txt'), 'token=ghp_' + 'a'.repeat(36) + '\n');
   git(dir, 'add', 'leak.txt');
-  const blocked = spawnSync('bash', [guard], { cwd: dir, encoding: 'utf8' });
+  const blocked = spawnSync(BASH, [guard], { cwd: dir, encoding: 'utf8' });
   assert.strictEqual(blocked.status, 2);
   assert.match(blocked.stderr, /possible secret/);
 });
 
 test('every skill an agent references exists and has valid frontmatter', { skip: !hasBash }, () => {
-  const r = spawnSync('bash', [validator, '.github'], { cwd: root, encoding: 'utf8' });
+  const r = spawnSync(BASH, [validator, '.github'], { cwd: root, encoding: 'utf8' });
   assert.strictEqual(r.status, 0, r.stdout + r.stderr);
 });
 

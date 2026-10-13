@@ -1,56 +1,25 @@
-# Implementation Plan — Automated Documentation Sync
+# Implementation Plan - SCRUM-1
+| # | Task | Depends on | Blocked? | Status |
+|---|------|-----------|----------|--------|
+| 1 | Record the approved entrypoint policy and retain only the minimum JSON error contract in AC-4; do not add a stricter shape or stream requirement. DR-3 is resolved by the user clarification; DR-2 remains limited to AC-4, and DR-4 retains unspecified operational message details without inventing text. | Approved design review; user clarification | No - DR-3 resolved. | Complete - policy captured |
+| 2 | Inspect current implementation and tests against the approved contracts without expanding source discovery; identify minimal deltas in the four configured modules and test/fixture layout. Use only app facts from `config/app-profile.yml`. | 1 | No - the source allowlist and selection policy are now specified; inspect only within that boundary. | Complete - existing CLI/mapping/render behavior retained; scanner and tests updated |
+| 3 | Implement/adjust scanner behavior for only approved local sources, reporting missing, malformed, and unreadable fact sources as unavailable so mapping can yield exact `Not Found` (FR-2, FR-3; `src/scanner.js`). For `Entry_Points`, existence-check only these root-relative paths in order: `backend/src/server.js`, `src/index.js`, `index.js`, `server.js`, `app.js`; select the first existing path and report that path. Do not read or execute candidates, inspect any other filenames, or walk directories. If none exists, return exactly `Not Found`. Add fixtures for absent/malformed package metadata and the ordered candidate-selection and no-candidate cases. | 1, 2 | No - exact ordered allowlist and existence-only behavior confirmed by user. | Complete - read failures safely absent; ordered existence-only selection tested |
+| 4 | Implement/adjust explicit placeholder mapping and fallback so each emitted value has an approved source and each unknown/unavailable token becomes `Not Found` (FR-3; `src/factMapper.js`). | 3 | No, after Task 3. | Complete - confirmed by all-placeholder fallback test |
+| 5 | Implement/adjust template token parsing and replacement so the generated Markdown replaces every requested token with mapped values and retains a single rendered document for file and JSON output (FR-1, FR-4; `src/templateEngine.js`). | 4 | No. | Complete - existing renderer verified by suite |
+| 6 | Implement/adjust CLI orchestration: validate required arguments, prevent resolved template/output path collision, write the output, report found/total, and emit the approved JSON success payload or agreed error response (FR-1, FR-4, FR-5; `src/index.js`). Keep app code local-only and dependency-free (NFR-1, NFR-2). | 1, 5 | Keep the JSON error contract at the minimum required by AC-4; no additional error shape or output-stream contract is specified. | Complete - existing behavior retained and exercised |
+| 7 | Add/update focused unit, CLI, and fixture integration tests for success, source provenance/fact extraction, each placeholder's `Not Found` case, missing/broken package metadata, ordered entrypoint priority (including first-existing selection), no candidate (`Entry_Points` exactly `Not Found`), confirm candidates are existence-checked but never read or executed, missing arguments, JSON success/error, and template/output collision. Every behavior change must have tests; record fact sources in verification evidence (AC-1 through AC-6; `test/`). | 3-6 | No, once implementation behavior is settled. | Complete - test suite 34 total, 0 failed, 3 skipped |
+| 8 | Run the self-sync command and verify generated count/content equals the approved baseline (8 / 15); inspect `TECHNICAL_PROFILE.md` output for full token replacement and honest fallbacks (FR-6; `npm run sync:self`). | 7 | No. | Complete - 8 / 15 fields found; profile refreshed |
+| 9 | Run the complete automated suite and confirm the agreed 34-test/zero-failure baseline or report any deliberate, approved test-count change; verify zero runtime dependencies and Node.js >=18 (NFR-2, NFR-3; `npm test`, `config/app-profile.yml`). | 7, 8 | No. | Complete - 34 total, 31 passed, 0 failed, 3 skipped |
+| 10 | Check implementation diff and generated output for bounded reads, no guessing, no network calls, no template overwrite, and alignment with approved requirements; leave peer code review to the next pipeline stage. | 9 | No. | Complete - implementation self-check done; peer review not started |
 
-Ordered by dependency. Nothing here is parallelizable in practice since it's
-one person working through it, but the ordering matters for anyone else
-picking this up mid-way.
+## Implementation evidence
 
-1. **`templateEngine.js`** — `parseTemplate` and `renderTemplate`.
-   No dependency on anything else in the project. Fully testable on its own
-   with hand-written strings, no filesystem or fixture repo needed.
-
-2. **`templates/technical-app-manifest.md`** — the actual template file,
-   reusing the same seven-section structure (Executive Summary, System
-   Architecture & Tech Stack, Integration & Dependencies, Technical
-   Configuration, Quality & Compliance, Documentation & Resources,
-   Deployment Status) already proven out in the EliteA capstone.
-   Depends on (1) only in the sense that the placeholder syntax has to match
-   what `parseTemplate` expects.
-
-3. **`test/fixtures/sample-repo/`** — a small, fake repo (its own
-   `package.json`, `README.md`, a `src/index.js`) with known, hand-picked
-   values. Blocks step 4 — you can't write a meaningful scanner test without
-   something to scan that isn't a moving target.
-
-4. **`scanner.js`** — `scanRepo`. Depends on (3) for its tests. Implemented
-   and tested against the fixture repo, not against this project's own
-   source tree.
-
-5. **`factMapper.js`** — `mapFacts`. Depends on (2) for the real placeholder
-   names it needs rules for, and (4) for the shape of `facts` it receives.
-   This is the biggest single piece of actual "business logic."
-
-6. **`index.js`** — wires (1), (4), and (5) together behind the CLI. Blocked
-   until all three exist; there's nothing to wire before then.
-
-7. **Integration test** — run the real CLI end-to-end against the fixture
-   repo and the real template, assert on the rendered output. Depends on
-   everything above existing and working in isolation first.
-
-8. **CI workflow** — `npm test` on push/PR. Trivial once (7) passes locally;
-   no reason to wire this up earlier and watch it fail on unfinished code.
-
-9. **Self-scan demo** — run the finished tool against *this* repo and commit
-   the result as `TECHNICAL_PROFILE.md`, so the README can point at a real,
-   live example instead of just describing one.
-
-## Not blocked, but deferred
-
-- Publishing the output anywhere other than a local file (out of scope per
-  `requirements.md`).
-- A recursive/glob-based entry-point search (accepted limitation, see
-  `design-review.md` finding #6).
+- `npm test`: 34 total tests, 31 passed, 0 failed, 3 skipped (hook tests are skipped because bash is unavailable on this host).
+- `npm run sync:self`: `8 / 15 fields found. Wrote TECHNICAL_PROFILE.md`.
+- Implementation docs were synchronized after the final scanner/test edits; the verified allowlist and fallback behavior are captured in requirements and architecture.
+- Peer code review has not started; it remains the next pipeline stage and requires your approval.
 
 ## Skills applied
-_Recorded in the skills-enforcement pass: each skill was checked against this document after it was written._
-- jira-story-readiness: tasks ordered by dependency and traceable to requirements.
-- code-review-checklist: test tasks planned for happy path and Not Found edge cases.
+
+- not-found-policy: Implemented and tested exact `Not Found` behavior for every registered placeholder and an unknown placeholder when facts are absent; malformed package metadata and unreadable README inputs degrade safely without guessing.
+- repo-fact-verifier: Verified scanner tests enforce source-only package/README facts and the exact root-relative entrypoint order; candidate files contain invalid source text yet scanning succeeds, demonstrating they are not read or executed. Self-sync facts were checked against the generated output and configured local-source policy.

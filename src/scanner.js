@@ -1,10 +1,9 @@
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
-// Known candidate entry points, checked in order. Not exhaustive by design —
-// see docs/design-review.md finding #6 for why this isn't a recursive walk.
+// Root-relative allowlist; priority is part of the Entry_Points contract.
 const ENTRY_POINT_CANDIDATES = [
   'backend/src/server.js',
   'src/index.js',
@@ -14,48 +13,41 @@ const ENTRY_POINT_CANDIDATES = [
 ];
 
 function readPackageJson(repoPath) {
-  const pkgPath = path.join(repoPath, 'package.json');
-  if (!fs.existsSync(pkgPath)) {
-    return null;
-  }
-
   try {
-    return JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+    return JSON.parse(fs.readFileSync(path.join(repoPath, 'package.json'), 'utf8'));
   } catch {
-    // Malformed package.json is treated the same as a missing one — every
-    // fact that would have come from it is simply absent, not a crash.
+    // Missing, unreadable, and malformed metadata is unavailable, not fatal.
     return null;
   }
 }
 
 function readReadmeSummary(repoPath) {
-  const readmePath = path.join(repoPath, 'README.md');
-  if (!fs.existsSync(readmePath)) {
+  let lines;
+  try {
+    lines = fs.readFileSync(path.join(repoPath, 'README.md'), 'utf8').split(/\r?\n/);
+  } catch {
+    // A missing or unreadable README provides no descriptive fact.
     return null;
   }
 
-  const lines = fs.readFileSync(readmePath, 'utf8').split(/\r?\n/);
   const paragraph = [];
-
   for (const line of lines) {
     const trimmed = line.trim();
     if (trimmed.startsWith('#') || trimmed.startsWith('```')) {
       continue;
     }
     if (trimmed === '') {
-      if (paragraph.length > 0) {
-        break;
-      }
+      if (paragraph.length > 0) break;
       continue;
     }
     paragraph.push(trimmed);
   }
-
   return paragraph.length > 0 ? paragraph.join(' ') : null;
 }
 
 function findEntryPoint(repoPath) {
   for (const candidate of ENTRY_POINT_CANDIDATES) {
+    // Deliberately check only existence: candidate source is never opened or run.
     if (fs.existsSync(path.join(repoPath, candidate))) {
       return candidate;
     }
@@ -63,11 +55,7 @@ function findEntryPoint(repoPath) {
   return null;
 }
 
-/**
- * Reads a local repository and returns a plain facts object. Knows nothing
- * about any template — it just reports what's actually on disk. Missing
- * files are represented as null, never thrown as errors.
- */
+/** Reads only permitted local sources and returns observed facts or nulls. */
 function scanRepo(repoPath) {
   return {
     pkg: readPackageJson(repoPath),

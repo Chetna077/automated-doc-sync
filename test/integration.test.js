@@ -8,6 +8,7 @@ const path = require('node:path');
 const { run } = require('../src/index');
 
 const FIXTURE_REPO = path.join(__dirname, 'fixtures', 'sample-repo');
+const BROKEN_JSON_REPO = path.join(__dirname, 'fixtures', 'broken-json-repo');
 const TEMPLATE = path.join(__dirname, '..', 'templates', 'technical-app-manifest.md');
 
 function stripLastSynced(text) {
@@ -33,6 +34,17 @@ test('CLI end-to-end: a field genuinely absent from the repo is marked Not Found
 
   // The fixture repo has no "build" script in package.json.
   assert.match(rendered, /\*\*Build Tool:\*\* Not Found/);
+
+  const emptyRepo = fs.mkdtempSync(path.join(os.tmpdir(), 'doc-sync-no-entrypoint-'));
+  const narrowTemplate = path.join(emptyRepo, 'template.md');
+  const generatedPath = path.join(emptyRepo, 'profile.md');
+  fs.writeFileSync(narrowTemplate, 'Entry: {{Entry_Points}}');
+  assert.equal(run(emptyRepo, narrowTemplate, generatedPath).rendered, 'Entry: Not Found');
+
+  const brokenTemplate = path.join(emptyRepo, 'broken-template.md');
+  fs.writeFileSync(brokenTemplate, 'Name: {{App_Name}} | Entry: {{Entry_Points}}');
+  assert.equal(run(BROKEN_JSON_REPO, brokenTemplate, generatedPath).rendered,
+    'Name: Not Found | Entry: Not Found');
 });
 
 test('CLI is deterministic run-to-run, aside from the Last Synced line', () => {

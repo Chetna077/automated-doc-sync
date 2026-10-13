@@ -8,6 +8,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
+if (require.main !== module) { module.exports = { findBash }; return; }
+
 const [script, ...args] = process.argv.slice(2);
 if (!script) { console.error('run-hook: usage: node run-hook.js <script.sh> [args]'); process.exit(0); }
 

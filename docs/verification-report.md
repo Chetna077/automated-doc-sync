@@ -47,3 +47,15 @@ found anywhere in the generated document.
 _Recorded in the skills-enforcement pass: each skill was checked against this document after it was written._
 - repo-fact-verifier: self-scan field-by-field check against real repo facts.
 - not-found-policy: unresolved fields in the self-scan are reported as `Not Found`, not filled in.
+
+## SCRUM-1 verification
+
+- `npm test`: 34 tests, 34 pass, 0 fail, 0 skipped (AC-8).
+- `npm run sync:self`: `8 / 15 fields found. Wrote TECHNICAL_PROFILE.md` (AC-7).
+- Entrypoint order, no-candidate case, unreadable README and broken `package.json` are covered by tests (AC-2, AC-6).
+- Runtime dependencies: none. Node.js >=18.
+- Hooks: secret guard, doc-drift check, skills check and the launcher all pass.
+
+## Skills applied (SCRUM-1)
+- repo-fact-verifier: self-scan facts checked against `package.json` and `README.md`; 7 unresolved fields remain `Not Found`.
+- not-found-policy: every unverifiable field is exactly `Not Found`.

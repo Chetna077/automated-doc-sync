@@ -1,132 +1,46 @@
-# Architecture — Automated Documentation Generator
+# Architecture - SCRUM-1
 
 ## Overview
 
-The generator is a local Node.js CLI with a small, linear pipeline. It reads
-a template and a repository checkout, maps explicitly supported repository
-facts to template tokens, and writes a rendered Markdown file. The scanner
-does not inspect arbitrary files, infer facts from naming conventions, or
-make network requests. Missing or unsupported facts render as `Not Found`.
+The approved scope is a local Node.js CLI that converts a placeholder-based Markdown template into a technical profile using only explicitly permitted facts from a repository checkout. The architecture separates argument and file orchestration, repository reading, placeholder-to-fact decisions, and rendering. Unverifiable values resolve to the literal `Not Found`; the CLI does not infer facts or call remote services. These boundaries implement requirements FR-1 through FR-5 and NFR-1 through NFR-2. Module names and descriptions below follow `config/app-profile.yml`.
 
-```text
-repoPath ──► scanRepo() ──► facts ──────────────┐
-                                                ▼
-templatePath ──► parseTemplate() ──► tokens ──► mapFacts()
-                                                │
-                                      mapped values + UTC date
-                                                ▼
-                                          renderTemplate()
-                                                │
-                                                ▼
-                                        outputPath (Markdown)
-                                                │
-                                    summary or JSON on stdout
-```
+## Components and Responsibilities
 
-The CLI in `src/index.js` coordinates these modules. The template parser and
-fact mapper remain independent of filesystem access where possible, which
-makes their rules straightforward to test.
+| Component | Responsibility | Inputs and outputs |
+|---|---|---|
+| CLI orchestration - `src/index.js` | Accept repo, template, output paths and optional `--json`; coordinate validation and the pipeline; write the output and emit either the summary or structured JSON. Prevent overwriting the template when paths resolve to the same file. | CLI arguments -> output Markdown plus stdout result, or an error result. |
+| Repository scanner - `src/scanner.js` | Read `package.json` and `README.md` for facts. For `Entry_Points`, existence-check only the ordered root-relative list `backend/src/server.js`, `src/index.js`, `index.js`, `server.js`, `app.js`; report only the first existing path, or `Not Found` if none exists. Never read or execute candidate contents, inspect any other filenames, or walk directories. Do not infer facts. | Repository path -> raw facts, with missing or invalid source facts represented as unavailable. |
+| Fact mapper - `src/factMapper.js` | Match requested template placeholders to explicit verified facts. Do not derive values from placeholder names or conventions; unresolved facts map to `Not Found`. | Raw facts and placeholder names -> mapped values. |
+| Template engine - `src/templateEngine.js` | Identify placeholder tokens and render the Markdown template using mapped values, retaining the complete rendered document for file output and JSON result. | Template text and mapped values -> token list and rendered Markdown. |
 
-## Components
+The module boundaries are intentionally one-way: CLI orchestration coordinates the work; the scanner reads repository facts; the mapper decides which observed facts support each token; the template engine renders text. This keeps filesystem access out of the mapping/rendering responsibilities and gives each requirement a clear architectural owner.
 
-### CLI orchestration — `src/index.js`
+## Data Flow
 
-- Accepts repository, template, and output paths, with an optional `--json`
-  flag. Relative paths are resolved from the current working directory.
-- Checks that the repository and template paths exist, then calls the
-  pipeline and creates the output directory when needed.
-- Always writes Markdown to the requested output file. Default mode prints a
-  field-count summary; JSON mode prints a structured success or error result
-  to stdout.
-- Converts operational errors into a non-zero process exit. JSON mode keeps
-  errors machine-readable.
+1. The CLI receives `<repoPath> <templatePath> <outputPath> [--json]` and checks required arguments and template/output path collision (FR-5).
+2. The template engine identifies tokens in the Markdown template; the scanner reads only permitted local repository sources (FR-1, FR-2).
+3. The fact mapper pairs tokens with supported observations. Missing, malformed, unreadable, unsupported, or unknown facts remain unverified and become the exact `Not Found` value (FR-3).
+4. The template engine renders the Markdown. The CLI writes the output file and reports the found/total count in plain mode, or returns the rendered document and counts in the requested JSON object (FR-1, FR-4).
+5. The self-sync command uses the same local pipeline with the configured template and output paths (FR-6). No remote system participates in runtime flow (NFR-1).
 
-### Template processing — `src/templateEngine.js`
+## Technology Choices
 
-- `parseTemplate(text)` returns the template text and its ordered,
-  de-duplicated `{{Token}}` names.
-- `renderTemplate(text, values)` replaces every token using its mapped value.
-  A missing value becomes the literal `Not Found`; an unsupported token is
-  not treated as a fatal error.
+- **JavaScript on Node.js >=18:** use the runtime specified in `config/app-profile.yml` (NFR-2).
+- **Node built-ins, zero runtime dependencies:** local filesystem and path handling are sufficient for the configured CLI; do not add runtime packages (NFR-1, NFR-2).
+- **Markdown template and local file output:** keeps generated content reviewable and within the approved local-only scope (FR-1).
+- **Structured JSON as an optional CLI presentation:** provides machine-readable status and rendered content without changing the Markdown file deliverable (FR-4).
+- **Explicit source and mapping boundary:** observed inputs are distinguished from mapping policy; unavailable evidence is represented as `Not Found`, not guessed (FR-2, FR-3).
 
-### Repository scanning — `src/scanner.js`
+## Risks
 
-- `scanRepo(repoPath)` returns raw facts independent of any particular
-  template: parsed `package.json`, the first descriptive paragraph of
-  `README.md`, and the first matching entry point from a fixed candidate
-  list.
-- The package data includes the fields used downstream, such as name,
-  version, Node engine, dependencies, development dependencies, and scripts.
-- Missing files and invalid `package.json` content produce absent facts.
-  Other filesystem failures propagate to the CLI as errors.
-- The scanner reads only these defined sources. It does not recursively walk
-  the repository or execute project code.
-
-### Fact mapping — `src/factMapper.js`
-
-- `mapFacts(facts, placeholders)` applies a named rule for each supported
-  placeholder. Rules explicitly map package metadata and README/entry-point
-  facts to document values.
-- Framework and database names are reported only when recognized package
-  names are present in dependencies. Build information is based on the
-  package's build script; no build is executed.
-- An unknown token, absent source fact, or unsupported value has no mapped
-  value, allowing the renderer to produce `Not Found` consistently.
-- Rules are explicit rather than inferred from token names. This makes each
-  generated claim traceable to a known input and keeps unsupported claims
-  conservative.
-
-## Data flow
-
-1. The CLI resolves its input and output paths and verifies that the required
-   input paths exist.
-2. The template engine parses the template and returns the token list.
-3. The scanner reads the bounded set of local repository inputs into a
-   plain facts object.
-4. The fact mapper resolves each requested token against its explicit rule.
-   Missing facts remain unresolved; they are not filled with guesses.
-5. The CLI adds the current UTC date for `Last_Synced`, and the renderer
-   substitutes all template tokens.
-6. The CLI writes the Markdown output and reports the result in the selected
-   stdout format.
-
-## Failure and missing-data behavior
-
-| Condition | Behavior |
-|---|---|
-| Repository or template path does not exist | Non-zero exit with a clear error; structured error in JSON mode |
-| `package.json` is absent or invalid JSON | Package-derived facts are absent and render as `Not Found` |
-| README or recognized entry point is absent | Related facts are absent and render as `Not Found` |
-| Template contains an unsupported token | Token renders as `Not Found`; generation continues |
-| An operational filesystem error occurs | Error is reported and the process exits non-zero |
-
-## Architectural decisions
-
-- **Local-only inputs:** no remote service, API token, or network access is
-  needed, so the tool can run against a checkout in CI.
-- **Bounded scanning:** a fixed source list limits runtime and makes it easy
-  to audit where generated claims came from. Broader language or framework
-  support should add explicit scanners and mapping rules, not guesswork.
-- **Explicit mapping:** the mapping table is the trust boundary between raw
-  repository data and human-readable documentation. It favors traceability
-  over automatic but potentially misleading inference.
-- **Markdown file as the deliverable:** publishing is outside this system;
-  the generated file can be reviewed and committed with the repository.
-- **No runtime dependencies:** built-in Node.js filesystem and path APIs are
-  sufficient for this bounded format and avoid adding parsing dependencies.
-
-## Quality attributes
-
-- **Determinism:** identical repository facts, template, and UTC date produce
-  identical output. `Last_Synced` is the sole date-dependent field.
-- **Testability:** parsing, mapping, scanning, CLI behavior, and end-to-end
-  output can be verified independently; scanner tests use checked-in fixture
-  repositories.
-- **Auditability:** every emitted value follows a named mapping rule or the
-  explicit `Not Found` fallback. Repository code is read as data and never
-  executed.
+| Risk | Impact | Architectural mitigation / verification |
+|---|---|---|
+| An unsupported or absent value is guessed or presented as fact. | Misleading technical documentation. | Keep source allowlist and explicit mapping boundary; default every unsupported value to `Not Found` (FR-2, FR-3; verify against AC-2 and AC-6). |
+| A malformed optional source terminates a run unexpectedly. | No profile is produced for otherwise usable repository inputs. | Treat missing/invalid package metadata as unavailable facts; verify the no-crash behavior in AC-6. Failures reading permitted fact sources yield unavailable facts and the `Not Found` fallback; failures reading the template or writing the output remain operational errors to report. |
+| Output path aliases the template input. | The input template could be destroyed. | Reject equal resolved paths before writing (FR-5; verify AC-5). |
+| JSON and plain output diverge or fail to reflect the rendered document. | Automation receives misleading status or content. | Have the CLI report the same rendered result and counts that are written to the output (FR-1, FR-4; verify AC-1 and AC-3). |
+| Runtime behavior or dependencies drift from the supported baseline. | Installation/runtime surprises or non-reproducible verification. | Keep runtime dependencies at zero and Node >=18; validate with the documented test command and AC-8 (NFR-2, NFR-3). |
 
 ## Skills applied
-_Recorded in the skills-enforcement pass: each skill was checked against this document after it was written._
-- repo-fact-verifier: facts come only from the scanner module, never from the template engine.
-- not-found-policy: fact mapper returns `Not Found` when the scanner has no verified value.
+
+- not-found-policy: Checked that the architecture keeps only observed local facts, disallows inference, and directs missing, malformed, unreadable, or unsupported facts to the exact `Not Found` fallback.

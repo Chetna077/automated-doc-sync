@@ -49,3 +49,8 @@ The AI agents draft each artifact. A human reviews and decides at every gate. No
 | Code and tests | [ ] Chetna Deshwal | |
 | Code review and verification | [ ] Chetna Deshwal | |
 | Pull request | [ ] Chetna Deshwal | |
+
+## SCRUM-1 run notes
+
+- Intake, requirements, architecture, design review, implementation plan and implementation ran through the Copilot `conductor` pipeline, each stopping for human approval.
+- The session ended with a network timeout (408) before the code review stage. The code review and verification entries above were written by Claude from the saved files and are awaiting human review. The reviewer sign-off boxes stay unticked until a person ticks them.

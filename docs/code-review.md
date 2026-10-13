@@ -33,6 +33,22 @@ checked out against its own stated requirement.
 | DRY | No duplicated logic found. | Info | No change. |
 | Dependency safety | Zero runtime dependencies and no lockfile, so `npm audit` has nothing to scan. | Info | Accepted. |
 
+## SCRUM-1 review (scanner hardening and entrypoint policy)
+
+Reviewed `src/scanner.js` and the changed tests against requirements FR-2, FR-3 and the design review (DR-1, DR-3, DR-5).
+
+| Area | Finding | Severity | Result |
+|---|---|---|---|
+| Correctness | Entrypoint lookup matches the approved policy: five root-relative candidates, first existing wins, existence check only, no match gives `Not Found`. | Low | Matches DR-3. |
+| Security | Candidates are never opened or run; user paths go only to `fs`; no network. | Low | Accepted. |
+| Error handling | README and `package.json` reads are wrapped in `try/catch`. A missing or unreadable file now returns no fact instead of crashing (closes the gap found in design review DR-1). | Medium | Fixed; test uses a directory named `README.md` to force a read error. |
+| Test coverage | Tests cover ordered entrypoint priority, no candidate, broken JSON and Not Found for every placeholder. Test count stays at 34 because existing tests were strengthened. | Info | Done. |
+| Code clarity | Comments state the contract (allowlist, existence-only). | Info | No change. |
+| DRY | Both readers use the same try/catch pattern; too small to extract. | Info | Accepted. |
+| Dependency safety | Zero runtime dependencies; no lockfile, so `npm audit` has nothing to scan. | Info | Accepted. |
+
+Open items from the design review that stay open on purpose: the exact JSON error shape (DR-2) and the missing-template message text (DR-4).
+
 ## Skills applied
 - code-review-checklist: seven areas reviewed; one high-severity gap found and fixed.
 - not-found-policy: confirmed missing or malformed sources return `Not Found`; no change needed.

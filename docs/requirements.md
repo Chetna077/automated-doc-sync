@@ -1,96 +1,44 @@
-# Requirements — Automated Documentation Sync
+# Requirements - SCRUM-1
 
-## User story
+## Story
 
-As an engineering team, we want a tool that keeps a repository's technical
-profile documentation in sync with the actual codebase, so that the doc
-never goes stale and nobody has to manually re-check `package.json` every
-time someone asks "what does this service actually run on?".
+As a developer or tech lead, I want a local CLI to fill a project's technical profile from verified repository facts, so that documentation takes less time to maintain and is less likely to be stale or incorrect. The CLI may use only `package.json`, `README.md`, and known entrypoint files; it must render any unverifiable fact as the exact text `Not Found` and must never guess. This scope and behavior are based on the approved SCRUM-1 intake.
 
-## Clarifying questions (Copilot Chat session)
+## Functional Requirements
 
-**Copilot:** Should this write directly to Confluence/GitHub, or just produce
-a file?
+- **FR-1 - Render a template to a local output file.** Accept `<repoPath> <templatePath> <outputPath>` and replace the template's `{{Placeholder}}` tokens with the resolved values. On success, write Markdown to the requested output path, print `<found> / <total> fields found. Wrote <outputPath>`, and exit 0. (Acceptance criteria: AC-1; configured CLI command in `config/app-profile.yml`; CLI wiring in `src/index.js`; rendering module in `src/templateEngine.js`.)
+- **FR-2 - Read only permitted local sources.** Resolve facts only from `package.json` and `README.md`, plus existence-only checks of these root-relative entrypoint candidates in priority order: `backend/src/server.js`, `src/index.js`, `index.js`, `server.js`, `app.js`. Select only the first existing candidate as `Entry_Points`; if none exists, the value is exactly `Not Found`. Never read or execute candidate contents, inspect other filenames, or walk directories. Do not infer facts from naming or conventions. (`src/scanner.js`; approved user clarification.)
+- **FR-3 - Represent absent or unverifiable facts honestly.** For missing, malformed, unreadable, or unsupported facts, render the exact value `Not Found`; a missing or invalid `package.json` must not crash the CLI, and the command exits 0 with affected fields marked `Not Found`. (Acceptance criteria: AC-2, AC-6; `src/factMapper.js` is the configured mapping module.)
+- **FR-4 - Provide structured JSON output.** When `--json` is supplied, emit one JSON object with `status`, `outputPath`, `fields: { found, total }`, and the rendered `document`. (Acceptance criterion: AC-3; `src/index.js` is the configured CLI wiring module.)
+- **FR-5 - Validate required arguments and protect the template input.** If any of the three required arguments is missing, print usage and exit 1; in JSON mode return a JSON error. If template and output resolve to the same path, do not write, report `Output path must differ from the template path: <templatePath>`, and exit 1. (Acceptance criteria: AC-4, AC-5; path-protection rule in `.github/instructions/security.instructions.md`; `src/index.js` is the configured CLI wiring module.)
+- **FR-6 - Support the documented self-sync workflow.** `npm run sync:self` must generate `TECHNICAL_PROFILE.md` with 8 of 15 fields found. (Acceptance criterion: AC-7; command is configured in `config/app-profile.yml`.)
 
-**Answer:** Just a file for now (`TECHNICAL_PROFILE.md`), committed alongside
-the code. Publishing it somewhere else is a follow-up, not this capstone.
+## Non-Functional Requirements
 
-**Copilot:** What happens when a fact isn't in the code at all — e.g.
-"Service Owner" or "On-Call Rotation"? Those aren't things a scanner can
-read from source.
+- **NFR-1 - Local-only operation.** Application operation must not require network access, credentials, or remote service calls. (Approved intake scope; local CLI command in `config/app-profile.yml`.)
+- **NFR-2 - No runtime dependencies; supported runtime.** Keep runtime dependencies at zero and support Node.js >=18. (`config/app-profile.yml`.)
+- **NFR-3 - Verifiable behavior.** `npm test` must complete with 34 tests passing and zero failures as stated in the approved intake; all SDLC documents must include a `## Skills applied` section. (Acceptance criterion: AC-8; test command in `config/app-profile.yml`; documentation rule in `.github/instructions/docs.instructions.md`.)
 
-**Answer:** Mark it `Not Found`. Never guess. This is the one rule the whole
-tool exists to enforce — a stale or fabricated doc is worse than an honest
-gap.
+## Open Questions
 
-**Copilot:** Does it need to hit the GitHub REST API to scan a repo, or can
-it work on a local checkout?
+- None identified from the approved intake. No implementation or external publishing authorization is implied by this requirements approval.
 
-**Answer:** Local checkout. Most real usage is "run this as part of CI on
-the repo you're already in" — no token, no network call, no rate limits.
+## Traceability
 
-**Copilot:** One target repo, or should it be reusable against any repo?
+Jira: [SCRUM-1](https://chetnadeshwal24.atlassian.net/browse/SCRUM-1) - Confluence: Not Found (no Confluence source was provided or required for intake).
 
-**Answer:** Reusable. Take a repo path and a template path as arguments.
-We'll demo it against its own repo, but it shouldn't be hardcoded to that.
+### Acceptance Criteria
 
-## Functional requirements
-
-1. **FR1 — Template-driven output.** The tool reads a Markdown template
-   containing `{{Placeholder}}` tokens and produces an output document with
-   every token replaced.
-2. **FR2 — Repo scanning.** Given a local repository path, the tool reads
-   `package.json`, the first descriptive paragraph in `README.md`, and a
-   documented list of candidate entry-point files. It does not recursively
-   crawl the repository or inspect arbitrary files.
-3. **FR3 — Strict fact extraction.** Every value written to the output must
-   be traceable to something read from the repo. If a placeholder has no
-   corresponding fact, its value is the literal string `Not Found` — never
-   an inferred or default value. Unknown placeholders and known placeholders
-   whose facts are absent follow the same rule.
-4. **FR4 — Stable re-run.** With the same repository, template, and current
-   date, repeated runs produce byte-identical output. Changes to repository
-   facts update the corresponding rendered values; the `Last_Synced` field
-   reflects the current UTC date.
-5. **FR5 — CLI interface.** The CLI accepts
-   `doc-sync <repoPath> <templatePath> <outputPath>` and an optional `--json`
-   flag. It writes the rendered Markdown to the requested output path and
-   reports success or a clear error; JSON mode emits a structured result
-   while preserving the Markdown output file.
-
-## Non-functional requirements
-
-1. **NFR1 — No network calls.** Everything operates on the local filesystem.
-2. **NFR2 — No new runtime dependencies.** Node's built-in `fs`/`path` only —
-   this is a small, auditable tool, not a reason to pull in a parsing
-   framework.
-3. **NFR3 — Deterministic.** The same repository state, template, and UTC
-    date produce the same document. Apart from the explicit `Last_Synced`
-    date, output contains no timestamps or non-deterministic ordering.
-4. **NFR4 — Testable without a real GitHub repo.** All scanning logic is
-   tested against a small fixture repo checked into `test/fixtures/`, not
-   against this project's own (moving) source tree.
-
-## Acceptance criteria
-
-- A valid repository and template produce a Markdown file at the requested
-   output path, with every template token replaced.
-- A fact that is absent, unsupported, or not explicitly discoverable is
-   rendered as `Not Found`; the tool does not guess.
-- Repeated runs on the same inputs and UTC date produce identical output.
-- Missing repository or template paths produce a non-zero exit status and a
-   clear error; JSON mode returns a structured error instead of a plain-text
-   message.
-- The tool works using local files only and does not require credentials or
-   network access.
-
-## Out of scope
-
-- Publishing to Confluence, GitHub Wiki, or any remote system.
-- Scanning multiple repos in one run.
-- Anything requiring a GitHub token or API call.
+- **AC-1:** With valid repository, Markdown template, and output paths, write the rendered output and print `<found> / <total> fields found. Wrote <outputPath>`; exit 0.
+- **AC-2:** Package and README facts come only from `package.json` and `README.md`. `Entry_Points` is only the first existing candidate in the approved priority list (`backend/src/server.js`, `src/index.js`, `index.js`, `server.js`, `app.js`), checked for existence only; candidate contents are never read or executed. No candidate or any other unverifiable fact is exactly `Not Found`.
+- **AC-3:** `--json` emits one object shaped as `{status, outputPath, fields: {found, total}, document}`.
+- **AC-4:** Missing any required argument prints usage and exits 1; `--json` returns a JSON error.
+- **AC-5:** Identical template and output paths are rejected with `Output path must differ from the template path: <templatePath>`; the template is not overwritten and the CLI exits 1.
+- **AC-6:** Missing or invalid `package.json` does not crash; affected fields are `Not Found`, and the CLI exits 0.
+- **AC-7:** `npm run sync:self` generates `TECHNICAL_PROFILE.md` with 8 / 15 fields found.
+- **AC-8:** `npm test` passes 34 tests with 0 failures; the project has no runtime dependencies and requires Node.js >=18.
 
 ## Skills applied
-_Recorded in the skills-enforcement pass: each skill was checked against this document after it was written._
-- jira-story-readiness: user story and acceptance criteria present; Not Found behaviour stated as a requirement.
-- not-found-policy: out-of-scope list confirms no guessing and no remote calls.
+
+- not-found-policy: Confirmed that absent, malformed, unreadable, or unsupported facts must resolve to the literal `Not Found`, with no inference; recorded that requirement in FR-2 and FR-3.
+- repo-fact-verifier: not applicable because this requirements-only phase does not add or accept implementation facts; app facts were taken from `config/app-profile.yml`, and behavior from the approved intake.
