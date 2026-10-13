@@ -61,5 +61,5 @@ The AI agents draft each artifact. A human reviews and decides at every gate. No
 |---|---|---|---|
 | Review | Completed, findings in `docs/code-review.md` | Claude | Approved by Chetna 2026-10-13 |
 | Verification | Completed, two corrections made, see `docs/verification-report.md` | Claude | Approved by Chetna 2026-10-13 |
-| PR description | Not started | | |
+| PR description | Completed, text in `docs/pr-description.md` | Claude | Chetna approval |
 | Push | Not started | | |
