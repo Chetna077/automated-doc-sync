@@ -60,6 +60,6 @@ The AI agents draft each artifact. A human reviews and decides at every gate. No
 | Stage | Status | Done by | Awaiting |
 |---|---|---|---|
 | Review | Completed, findings in `docs/code-review.md` | Claude | Approved by Chetna 2026-10-13 |
-| Verification | Completed, two corrections made, see `docs/verification-report.md` | Claude | Approved by Chetna 2026-10-13 |
-| PR description | Completed, text in `docs/pr-description.md` | Claude | Approved by Chetna 2026-10-13 |
+| Verification | Re-run by the Copilot agent using repo-fact-verifier (40 tests, every profile field checked), see `docs/verification-report.md` | Copilot + Claude | Approved by Chetna 2026-10-13 |
+| PR description | Copilot publish stage read PR #1 and CI through the GitHub MCP server (read-only); text in `docs/pr-description.md` | Copilot + Claude | Approved by Chetna 2026-10-13 |
 | Push | Blocked in the Claude sandbox (HTTP 403 from the proxy); run from your terminal | Chetna | `git push -u origin HEAD` |
