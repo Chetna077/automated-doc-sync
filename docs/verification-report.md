@@ -16,7 +16,8 @@ $ npm test
 ```
 
 34/34 passing: template engine (6), scanner (5), fact mapper (7),
-integration (5), CLI subprocess (6, including the --json flag).
+integration (5), CLI subprocess (6, including the --json flag),
+overwrite guard (1), hooks and launcher (4).
 
 ## Content quality check — self-scan output
 
@@ -49,6 +50,21 @@ _Recorded in the skills-enforcement pass: each skill was checked against this do
 - not-found-policy: unresolved fields in the self-scan are reported as `Not Found`, not filled in.
 
 ## SCRUM-1 verification
+
+### Facts checked against the repository (13 Oct 2026)
+
+| Claim | Source checked | Result |
+|---|---|---|
+| 34 tests, 34 pass, 0 skipped | `node --test test/*.test.js` | Verified |
+| Per-file tests: cli 6, factMapper 7, hooks 4, integration 5, overwrite-guard 1, scanner 5, templateEngine 6 | `grep -c "^test("` per file | Verified (sum 34) |
+| Zero runtime and dev dependencies; Node >=18 | `package.json` | Verified |
+| Self-scan finds 8 of 15 fields, 7 are `Not Found` | `npm run sync:self`, `--json` output (`found 8, total 15`) | Verified |
+| Missing template and repo give clear messages, exit 1 | `Template not found: ...`, `Repo not found: ...` | Verified |
+| Same template and output path is refused, exit 1 | `Output path must differ from the template path: ...` | Verified |
+| 7 agents, 5 skills, 3 instruction files, 6 hook scripts | `ls .github/...` | Verified |
+| Skill validator passes | `validate-skills.sh .github` | Verified |
+
+Corrections made: the test breakdown above listed 29 tests and left out the overwrite guard and hook tests; and the first code review draft wrongly said a missing template gives a raw ENOENT error (see R-1).
 
 - `npm test`: 34 tests, 34 pass, 0 fail, 0 skipped (AC-8).
 - `npm run sync:self`: `8 / 15 fields found. Wrote TECHNICAL_PROFILE.md` (AC-7).

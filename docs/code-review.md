@@ -55,7 +55,7 @@ Files reviewed: `src/scanner.js`, `src/index.js`, `src/factMapper.js`, `test/*.t
 
 | ID | Area | Finding | Severity | Recommended action |
 |---|---|---|---|---|
-| R-1 | Error handling | A missing template or repo path throws the raw Node error (for example ENOENT). The message text is still undefined (DR-4). | Medium | Accept for this story; list under Known Limitations. |
+| R-1 | Error handling | A missing template or repo path gives a clear message (`Template not found: <path>`, `Repo not found: <path>`) and exit code 1. The exact wording is not fixed by the requirements (DR-4). | Low | Accept; record the wording as a Known Limitation. (Corrected during verification: an earlier draft wrongly said a raw ENOENT error.) |
 | R-2 | Security | If Git Bash is not installed, `run-hook.js` skips every hook with a warning, so the secret guard is off on that machine. | Medium | Accept; documented in the README and the launcher message. |
 | R-3 | Security | The secret guard scans only staged changes, not files an agent has just written. | Low | Accept; it blocks at commit time. |
 | R-4 | Correctness | `doc-drift-check.sh` uses `find -printf` (GNU only). On macOS it prints "up to date" without checking. | Low | Accept; hooks target Windows and Linux with Git Bash. |
@@ -64,7 +64,7 @@ Files reviewed: `src/scanner.js`, `src/index.js`, `src/factMapper.js`, `test/*.t
 | R-7 | Code clarity / DRY | `factMapper.js` rules are explicit and repetitive on purpose (see architecture). No duplication worth extracting. | Info | None. |
 | R-8 | Dependency safety | Zero runtime dependencies, no lockfile, so `npm audit` has nothing to scan. | Info | None. |
 
-Required fixes before the PR: none. Items R-1, R-2 and R-4 go into Known Limitations.
+Required fixes before the PR: none. Items R-2 and R-4 go into Known Limitations.
 
 ## Skills applied
 - code-review-checklist: seven areas reviewed; one high-severity gap found and fixed.

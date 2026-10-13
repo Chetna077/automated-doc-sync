@@ -60,6 +60,6 @@ The AI agents draft each artifact. A human reviews and decides at every gate. No
 | Stage | Status | Done by | Awaiting |
 |---|---|---|---|
 | Review | Completed, findings in `docs/code-review.md` | Claude | Chetna approval, then tick "Code review and verification" |
-| Verification | Not started | | |
+| Verification | Completed, two corrections made, see `docs/verification-report.md` | Claude | Chetna approval, then tick "Code review and verification" |
 | PR description | Not started | | |
 | Push | Not started | | |
