@@ -7,6 +7,12 @@
         "bash": "node .github/hooks/scripts/run-hook.js secret-guard.sh",
         "powershell": "node .github/hooks/scripts/run-hook.js secret-guard.sh",
         "timeoutSec": 15
+      },
+      {
+        "type": "command",
+        "bash": "node .github/hooks/scripts/token-guard.js",
+        "powershell": "node .github/hooks/scripts/token-guard.js",
+        "timeoutSec": 10
       }
     ],
     "postToolUse": [
