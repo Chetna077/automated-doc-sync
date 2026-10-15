@@ -21,6 +21,12 @@
         "bash": "node .github/hooks/scripts/run-hook.js doc-drift-check.sh",
         "powershell": "node .github/hooks/scripts/run-hook.js doc-drift-check.sh",
         "timeoutSec": 15
+      },
+      {
+        "type": "command",
+        "bash": "node .github/hooks/scripts/token-report.js",
+        "powershell": "node .github/hooks/scripts/token-report.js",
+        "timeoutSec": 10
       }
     ],
     "agentStop": [
