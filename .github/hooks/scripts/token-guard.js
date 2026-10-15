@@ -32,7 +32,7 @@ function check(input, env = process.env) {
     if (!p) return null;
     if (/(^|\/)(node_modules|\.git|coverage)(\/|$)/.test(p)) return `${p} is vendored/generated content. Search it for the exact symbol instead.`;
     if (/(package-lock\.json|yarn\.lock|pnpm-lock\.yaml)$/i.test(p)) return `${p} is a lockfile. Search for the specific package instead.`;
-    if (/\.(docx|xlsx|pptx|zip|gz|tar|tgz|exe|dll|min\.js|min\.css|map)$/i.test(p)) return `${p} is a binary or minified file that cannot be read usefully as text.`;
+    if (/\.(docx|xlsx|pptx|zip|gz|tar|tgz|exe|dll|min\.js|min\.css|map|png|jpe?g|gif|bmp|webp|ico|pdf|mp4|mov)$/i.test(p)) return `${p} is a binary or minified file that cannot be read usefully as text.`;
     if (args.view_range || args.offset !== undefined || args.limit !== undefined) return null;
     let size;
     try { size = fs.statSync(p).size; } catch { return null; }
