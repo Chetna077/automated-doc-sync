@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "node .github/hooks/scripts/run-hook.js secret-guard.sh",
+        "powershell": "node .github/hooks/scripts/run-hook.js secret-guard.sh",
+        "timeoutSec": 15
+      },
+      {
+        "type": "command",
+        "bash": "node .github/hooks/scripts/token-guard.js",
+        "powershell": "node .github/hooks/scripts/token-guard.js",
+        "timeoutSec": 10
+      }
+    ],
+    "postToolUse": [
+      {
+        "type": "command",
+        "bash": "node .github/hooks/scripts/run-hook.js doc-drift-check.sh",
+        "powershell": "node .github/hooks/scripts/run-hook.js doc-drift-check.sh",
+        "timeoutSec": 15
+      },
+      {
+        "type": "command",
+        "bash": "node .github/hooks/scripts/token-report.js",
+        "powershell": "node .github/hooks/scripts/token-report.js",
+        "timeoutSec": 10
+      }
+    ],
+    "agentStop": [
+      {
+        "type": "command",
+        "bash": "node .github/hooks/scripts/run-hook.js run-tests.sh",
+        "powershell": "node .github/hooks/scripts/run-hook.js run-tests.sh",
+        "timeoutSec": 120
+      },
+      {
+        "type": "command",
+        "bash": "node .github/hooks/scripts/run-hook.js check-skills-applied.sh docs",
+        "powershell": "node .github/hooks/scripts/run-hook.js check-skills-applied.sh docs",
+        "timeoutSec": 15
+      }
+    ],
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "node .github/hooks/scripts/run-hook.js validate-skills.sh .github",
+        "powershell": "node .github/hooks/scripts/run-hook.js validate-skills.sh .github",
+        "timeoutSec": 15
+      }
+    ]
+  }
+}
