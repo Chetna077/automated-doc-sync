@@ -18,3 +18,5 @@ jobs:
         run: npm test
       - name: Validate agent skills are wired
         run: bash .github/hooks/scripts/validate-skills.sh .github
+      - name: Verify documented test count is current
+        run: node scripts/check-doc-counts.js docs/verification-report.md
