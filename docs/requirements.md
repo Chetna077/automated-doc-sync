@@ -2,7 +2,7 @@
 
 ## Story
 
-As a developer or tech lead, I want a local CLI to fill a project's technical profile from verified repository facts, so that documentation takes less time to maintain and is less likely to be stale or incorrect. The CLI may use only `package.json`, `README.md`, and known entrypoint files; it must render any unverifiable fact as the exact text `Not Found` and must never guess. This scope and behavior are based on the approved SCRUM-1 intake.
+As a developer or tech lead, I want a local CLI to fill a project's technical profile from verified repository facts, so that documentation takes less time to maintain and is less likely to be stale or incorrect. The CLI may use only `package.json`, `README.md`, and known entrypoint files; it must render any unverifiable fact as the exact text `Not Found` and must never guess. In scope: `src/index.js`, `src/scanner.js`, `src/factMapper.js`, `src/templateEngine.js`, the `--json` flag, 40 tests, self-sync generation of `TECHNICAL_PROFILE.md` with 8 of 15 fields, `.github` agents/skills/hooks, and documentation under `docs/`. Out of scope: network or remote calls; reading any source other than `package.json`, `README.md`, and the five specified entrypoint candidates (existence checks only); new runtime dependencies; and publishing or Jira/PR writes without explicit approval.
 
 ## Functional Requirements
 
@@ -17,7 +17,7 @@ As a developer or tech lead, I want a local CLI to fill a project's technical pr
 
 - **NFR-1 - Local-only operation.** Application operation must not require network access, credentials, or remote service calls. (Approved intake scope; local CLI command in `config/app-profile.yml`.)
 - **NFR-2 - No runtime dependencies; supported runtime.** Keep runtime dependencies at zero and support Node.js >=18. (`config/app-profile.yml`.)
-- **NFR-3 - Verifiable behavior.** `npm test` must complete with 40 tests passing and zero failures (34 at intake; 6 regression tests were added by the approved review fixes) intake; all SDLC documents must include a `## Skills applied` section. (Acceptance criterion: AC-8; test command in `config/app-profile.yml`; documentation rule in `.github/instructions/docs.instructions.md`.)
+- **NFR-3 - Verifiable behavior.** `npm test` must complete with 40 tests passing and zero failures; all SDLC documents must include a `## Skills applied` section. (Acceptance criterion: AC-8; test command in `config/app-profile.yml`; documentation rule in `.github/instructions/docs.instructions.md`.)
 
 ## Open Questions
 
@@ -36,9 +36,8 @@ Jira: [SCRUM-1](https://chetnadeshwal24.atlassian.net/browse/SCRUM-1) - Confluen
 - **AC-5:** Identical template and output paths are rejected with `Output path must differ from the template path: <templatePath>`; the template is not overwritten and the CLI exits 1.
 - **AC-6:** Missing or invalid `package.json` does not crash; affected fields are `Not Found`, and the CLI exits 0.
 - **AC-7:** `npm run sync:self` generates `TECHNICAL_PROFILE.md` with 8 / 15 fields found.
-- **AC-8:** `npm test` passes 40 tests (34 at intake plus 6 regression tests from the approved review fixes) with 0 failures; the project has no runtime dependencies and requires Node.js >=18.
+- **AC-8:** `npm test` passes exactly 40 tests with 0 failures; the project has no runtime dependencies and requires Node.js >=18.
 
 ## Skills applied
 
-- not-found-policy: Confirmed that absent, malformed, unreadable, or unsupported facts must resolve to the literal `Not Found`, with no inference; recorded that requirement in FR-2 and FR-3.
-- repo-fact-verifier: not applicable because this requirements-only phase does not add or accept implementation facts; app facts were taken from `config/app-profile.yml`, and behavior from the approved intake.
+- jira-story-readiness: Confirmed SCRUM-1 is an existing story, checked summary, description, business value, scenarios, expected result, affected areas, and acceptance criteria; recorded the clarified scope and remaining out-of-scope items. No open questions remain for intake.

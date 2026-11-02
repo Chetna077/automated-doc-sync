@@ -24,6 +24,18 @@ test('CLI given real arguments runs end-to-end and reports a field count', () =>
   assert.equal(result.status, 0);
   assert.match(result.stdout, /\d+ \/ \d+ fields found\. Wrote/);
   assert.ok(fs.existsSync(outputPath));
+
+  const malformedRepo = fs.mkdtempSync(path.join(os.tmpdir(), 'doc-sync-invalid-package-'));
+  const narrowTemplate = path.join(malformedRepo, 'template.md');
+  const narrowOutput = path.join(malformedRepo, 'profile.md');
+  fs.writeFileSync(path.join(malformedRepo, 'package.json'), '{ invalid JSON');
+  fs.writeFileSync(narrowTemplate, 'Name: {{App_Name}}');
+  const invalidPackageResult = spawnSync(process.execPath,
+    [CLI, malformedRepo, narrowTemplate, narrowOutput], { encoding: 'utf8' });
+
+  assert.equal(invalidPackageResult.status, 0);
+  assert.ok(invalidPackageResult.stdout.startsWith('0 / 1 fields found. Wrote'));
+  assert.equal(fs.readFileSync(narrowOutput, 'utf8'), 'Name: Not Found');
 });
 
 test('CLI --json prints a structured result and still writes the Markdown document', () => {

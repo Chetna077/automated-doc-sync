@@ -1,48 +1,44 @@
-# SCRUM-1: Automated Documentation Sync CLI + Copilot agentic pipeline
+# SCRUM-1: Verified-fact CLI and approved pipeline scope
 
 ## Summary
-Adds a zero-dependency Node.js CLI that fills `{{Placeholder}}` templates from facts verified in a real repository (`package.json`, `README.md` and known entrypoint files) and writes the exact text `Not Found` for anything it cannot verify. The work was delivered through a GitHub Copilot agentic SDLC pipeline (agents, prompt, instructions, skills, hooks, MCP) with a human approval at every stage.
+This change documents and validates SCRUM-1's local, dependency-free technical-profile CLI contract: facts come only from the approved local sources, and unverifiable values render as `Not Found`. The latest build adds a CLI regression test for malformed `package.json`; the existing application modules already met the approved behavior, so no production-module edits were needed in this run.
 
 ## Changes Made
-- `src/templateEngine.js`, `scanner.js`, `factMapper.js`, `index.js`: the four-module CLI, including the `--json` flag.
-- `src/scanner.js` (SCRUM-1): a missing or unreadable README or `package.json` returns no fact, so the field renders `Not Found` instead of crashing. Entrypoint lookup is an ordered, existence-only allowlist: `backend/src/server.js`, `src/index.js`, `index.js`, `server.js`, `app.js`.
-- `src/index.js` and `test/overwrite-guard.test.js`: the tool refuses to write over its own template.
-- `test/*.test.js` and fixtures: 40 tests, including Not Found, broken-JSON, unreadable-README, entrypoint-priority, special-name, empty-fact and hard-link cases.
-- `.github/agents/*` (7, RISE format, with handoff buttons so a human approves each stage) and `.github/prompts/run-pipeline.prompt.md`.
-- `.github/copilot-instructions.md`, `.github/instructions/*` (3) and `.github/skills/*` (5). SDLC documents end with a `## Skills applied` section.
-- `.github/hooks/hooks.json` in the Copilot hook format, plus `scripts/run-hook.js`, a launcher that works on Windows and never blocks on a broken hook. Hooks: before = secret guard, after = doc-drift check, stop = run tests and check `## Skills applied`, session start = validate skills.
-- `.vscode/mcp.json`: Atlassian (v2 endpoint) and GitHub MCP servers. `config/app-profile.yml`: app facts.
-- `docs/`: requirements, architecture, design review, implementation plan, code review, verification report, trace log, handoff, demo flow.
-- `CHANGELOG.md` and `.github/workflows/ci.yml` (CI also validates skill wiring).
+- `docs/requirements.md`, `docs/architecture.md`, `docs/design-review.md`, `docs/impl-plan.md` - record the approved requirements, architecture boundaries, resolved scope, and dependency-ordered plan.
+- `test/cli.test.js` - exercise malformed `package.json` through the CLI; assert exit 0, 0 / 1 fields found, and literal `Not Found` output.
+- `TECHNICAL_PROFILE.md` - refreshed self-sync output for the verification date.
+- `docs/handoff.md`, `docs/code-review.md`, `docs/verification-report.md` - record build, seven-area review, verification evidence, limitations, and skill evidence.
+- `CHANGELOG.md` - proposed Unreleased entry for the clarified scope, regression coverage, and refreshed verification evidence.
 
 ## Test Evidence
+`npm test` (real output summary):
 ```
-$ npm test
+> automated-doc-sync@1.0.0 test
+> node --test test/*.test.js
+
 # tests 40
 # pass 40
 # fail 0
+# cancelled 0
 # skipped 0
-$ npm run sync:self
-8 / 15 fields found. Wrote TECHNICAL_PROFILE.md
+# todo 0
 ```
-Details and the list of facts checked: `docs/verification-report.md`. Review findings: `docs/code-review.md`.
+
+`npm run sync:self` output: `8 / 15 fields found. Wrote TECHNICAL_PROFILE.md`. Full per-field source checks: `docs/verification-report.md`.
 
 ## Known Limitations
-- Only `package.json`, `README.md` and the five known entrypoint files are read. Other facts render `Not Found` (7 of the 15 fields in the self-scan).
-- The wording of the missing-template and missing-repo errors is not fixed by the requirements (DR-4). The JSON error shape is limited to the minimum in AC-4 (DR-2).
-- Without Git Bash installed, the hook launcher skips the hooks with a warning, so the secret guard is off on that machine (R-2).
-- `doc-drift-check.sh` uses GNU `find -printf`, so it does not work on macOS (R-4).
-- GitHub MCP needs a token entered at first start. No live Jira or Confluence write runs in CI.
+- `npm audit` was inconclusive (ENOLOCK): no lockfile exists; the manifest declares no runtime or development dependencies.
+- Facts unsupported by the approved sources remain `Not Found`; only `package.json`, `README.md`, and existence-only checks of the five ordered entrypoint candidates are in scope. No network, remote calls, or unapproved Jira/Confluence/GitHub/PR/commit actions are included.
+- Other invalid/missing path behavior and unspecified JSON-error details remain outside the approved contract.
 
 ## Reviewer Checklist
-- [ ] `npm test` passes locally (expect 40 of 40, 0 skipped)
+- [ ] `npm test` passes locally (40 passed, 0 failed, 0 skipped)
 - [ ] `npm run sync:self` reports 8 / 15 fields found
-- [ ] No secrets in the diff (`secret-guard.sh` clean)
-- [ ] `docs/` matches the code (`doc-drift-check.sh` clean)
-- [ ] Every SDLC document ends with `## Skills applied`
-- [ ] Not Found cases are covered by tests
-- [ ] `docs/trace-log.md` sign-offs match the approvals you saw
+- [ ] No secrets in the diff
+- [ ] `docs/` aligns with the approved scope and implementation
+- [ ] Not Found and malformed package cases are covered
+- [ ] External writes and commits remain pending separate explicit approval
 
 ## Skills applied
-- pr-description-writer: five required sections in order, written only from facts checked in `docs/verification-report.md`.
-- repo-fact-verifier: test counts, field counts, file counts and error messages were verified against the repository before being written here.
+
+- pr-description-writer: Checked all five required PR sections and grounded changes, test evidence, and limitations in the reviewed local artifacts; prepared a proposal only, not a posted PR.

@@ -1,53 +1,49 @@
-# Code Review — SCRUM-1
+# Code Review - SCRUM-1
 
 **Phase:** Review
-**Scope:** Current implementation and tests against [`requirements.md`](requirements.md); worktree had no pre-existing changes at review start.
-**Review date:** 2026-10-13
-
-The approved follow-up fixes for C-1, C-2, C-3, and S-1 are implemented with regression tests. Line references below point to the current repository state.
+**Scope:** Approved SCRUM-1 requirements, current implementation, focused build test change, and generated profile. Earlier approved intake/design documentation remains in the worktree and was not treated as an implementation change. No application-module source changes were present in this build.
+**Review date:** 2026-11-02
 
 ## Correctness
 
-- **Finding C-1 — Special placeholder names can crash or fabricate a value. Severity: medium. Disposition: fixed.** `mapFacts` now accepts only own `RULES` keys, and `renderTemplate` treats inherited names as absent (`src/factMapper.js`, `src/templateEngine.js`). Regression coverage exercises `__proto__`, `constructor`, and `toString`, requiring each to render as `Not Found` (`test/factMapper.test.js`).
-- **Finding C-2 — Empty metadata is counted as found although rendered as `Not Found`. Severity: low. Disposition: fixed.** `mapFacts` omits empty and whitespace-only strings, the renderer uses the same blank-value fallback, and `run` excludes blank values from `foundCount` (`src/factMapper.js`, `src/templateEngine.js`, `src/index.js`). The integration regression verifies empty package name and whitespace-only author render as `Not Found` and yield `foundCount === 0` (`test/integration.test.js`).
-- **Finding C-3 — A directory at an entrypoint candidate path is reported as an entrypoint. Severity: low. Disposition: fixed.** The scanner now uses `statSync().isFile()` without reading candidate contents, continuing through the allowlist when a candidate is not a regular file (`src/scanner.js`). Regression coverage verifies a directory named `backend/src/server.js` is skipped in favor of the next regular candidate (`test/scanner.test.js`).
+- **No new correctness finding. Severity: low. Disposition: accepted.** The current modules align with FR-1 through FR-6: the scanner limits package/README reads and existence-only checks to the ordered candidate list; the mapper and renderer use exact `Not Found` fallbacks; CLI behavior covers the stated JSON success and argument/path safeguards; self-sync uses the configured local command. Build changed only test coverage for malformed package metadata, which now confirms exit 0 and a literal fallback. No behavior outside the approved contracts was added.
 
 ## Security
 
-- **Finding S-1 — Template overwrite protection is bypassable when output is another hard link to the template. Severity: medium. Disposition: fixed.** `run` now compares the device and inode of existing paths after the resolved-path check, refusing to write through a hard link or symlink to the template (`src/index.js`). Regression coverage creates a hard link and confirms both paths retain the original contents after the refusal (`test/overwrite-guard.test.js`). No shell interpolation or network calls were found in the reviewed application modules (`src/index.js`, `src/scanner.js`, `src/factMapper.js`, `src/templateEngine.js`).
+- **No new security finding. Severity: low. Disposition: accepted.** Application code uses local filesystem operations and does not make network calls or execute candidate contents. The CLI same-file/hard-link guard prevents overwriting the template; child processes in tests use argument arrays rather than shell interpolation. The review found no secrets in output or introduced dependency surface. Existing race conditions between path checking and writing are not addressed by the current local CLI contract.
 
 ## Error Handling
 
-- **No finding. Severity: low. Disposition: accepted risk / no change.** Missing or malformed package metadata and unreadable README input degrade to unavailable facts (`src/scanner.js:15-45`); invalid repo/template paths produce clear errors (`src/index.js:14-26`). Tests exercise malformed package metadata, empty repositories, an unreadable README represented by a directory, missing repo/template paths, and JSON CLI errors (`test/scanner.test.js:51-71`, `test/integration.test.js:58-63`, `test/cli.test.js:42-68`). Operational read/write exceptions are caught at the CLI boundary and emitted as a message or JSON error (`src/index.js:71-81`).
+- **No new error-handling finding. Severity: low. Disposition: accepted.** Missing/malformed package metadata and unavailable README/candidate facts resolve to unavailable values and then `Not Found`; the new process-level regression verifies malformed `package.json` exits 0 and writes that fallback. Required-argument, missing-repository/template, and template/output-collision cases are covered by existing tests. Other invalid/missing path behavior remains out of scope per approved intake.
 
 ## Test Coverage
 
-- **No finding. Severity: low. Disposition: accepted risk / no change.** `npm test` passed **39 tests, 0 failures, 0 skipped**. Test coverage includes successful CLI and integration paths (`test/cli.test.js`, `test/integration.test.js`), missing/unsupported facts, malformed package data, literal `Not Found` fallbacks, and regression cases for C-1, C-2, C-3, and S-1 (`test/factMapper.test.js`, `test/scanner.test.js`, `test/overwrite-guard.test.js`).
+- **No new coverage finding. Severity: low. Disposition: accepted.** Existing tests cover populated facts, empty/malformed sources, unsupported placeholders, all registered fact placeholders with null source facts, no approved entrypoint, ordered candidate selection without executing candidate content, JSON output/errors, and overwrite protection. The build added an end-to-end CLI test for malformed `package.json`. Review run: `npm test` - 40 tests, 40 passed, 0 failed, 0 skipped.
 
 ## Code Clarity
 
-- **No finding. Severity: low. Disposition: accepted risk / no change.** The implementation keeps scanning, fact mapping, rendering, and CLI orchestration in separate modules (`src/scanner.js:58-67`, `src/factMapper.js:76-95`, `src/templateEngine.js:5-35`, `src/index.js:14-84`); intent and the ordered entrypoint policy are documented in code comments.
+- **No finding. Severity: low. Disposition: accepted.** Responsibilities remain separated among CLI orchestration, scanner, explicit mapping rules, and template rendering. The source allowlist and selection priority are named and documented. No production code change was made during this build.
 
 ## DRY
 
-- **No finding. Severity: low. Disposition: accepted risk / no change.** Dependency/script list formatting is shared through `formatKeyValueList` (`src/factMapper.js:38-47`), while `RULES` remains explicit per the documented mapping contract (`src/factMapper.js:49-74`). The two README-derived fields intentionally reuse the same scanned fact (`src/factMapper.js:55, 71`); no material duplicated logic warrants abstraction in this scope.
+- **No finding. Severity: low. Disposition: accepted.** Existing shared list formatting and explicit placeholder rules remain appropriate: the mapping table is deliberately explicit to avoid reflective guessing. The new malformed-package regression reuses the established CLI test conventions and adds no unnecessary abstraction.
 
 ## Dependency Safety
 
-- **Finding D-1 — Dependency audit could not run against a lockfile. Severity: low. Disposition: accepted risk.** `npm audit` exited with `ENOLOCK` because the repository has no `package-lock.json` or `npm-shrinkwrap.json`. `package.json` declares no `dependencies` or `devDependencies` and requires Node.js `>=18`, so there are no declared third-party packages in the manifest to flag (`package.json:1-17`). The audit result is **inconclusive**, not a clean vulnerability audit; rerun if a dependency lockfile is introduced.
+- **Finding D-1 - Audit result is inconclusive. Severity: low. Disposition: accepted limitation.** `npm audit` was attempted as required but exited `ENOLOCK` because this repository has no lockfile. The manifest declares no `dependencies` or `devDependencies`, and application code adds no package. Therefore no lockfile-backed vulnerability assessment is available; the audit is not reported as clean. Re-run if dependency declarations or a lockfile are introduced.
 
 ## Fix status
 
-- C-1, C-2, C-3 and S-1: fixed, each with a regression test (approved by Chetna on 2026-10-13).
-- Found during verification and fixed: the found-count read inherited properties, so `{{constructor}}` counted as found (`src/index.js`).
-- D-1: accepted. Test result after fixes: 40 tests, 40 pass.
+- No review findings required implementation fixes. The malformed-package success/fallback test was added during Build; application modules were unchanged.
+- Build and Review test run both met the exact approved AC-8 count: 40 tests, 0 failures.
+- Self-sync result recorded during Build: `8 / 15 fields found. Wrote TECHNICAL_PROFILE.md`.
 
 ## Known Limitations
 
-- D-1: `npm audit` cannot assess a dependency tree without a lockfile; the current manifest declares no external packages.
+- D-1: `npm audit` cannot assess a lockfile-backed dependency tree without a lockfile. The package manifest currently declares no runtime or development dependencies.
+- The JSON error payload's exact shape and operational error-message details beyond stated criteria remain unspecified and were not expanded.
 
 ## Skills applied
 
-- code-review-checklist: Reviewed correctness, security, error handling, test coverage, code clarity, DRY, and dependency safety; documented concrete findings and dispositions above, ran `npm test` and `npm audit`.
-- not-found-policy: Checked mapper, renderer, tests, and requirement that missing, unsupported, malformed, or unreadable facts become literal `Not Found`; confirmed shared fallback coverage and identified C-1 as an unsupported-placeholder exception.
-- not-found-policy (approved fixes): verified prototype-property placeholders and empty metadata now render as `Not Found`; added focused regression coverage.
+- code-review-checklist: Reviewed correctness, security, error handling, test coverage, code clarity, DRY, and dependency safety; ran `npm test` and attempted `npm audit`. The seven areas are documented above; audit status is explicitly inconclusive because no lockfile exists.
+- not-found-policy: Checked missing, malformed, empty, unsupported, and unreadable source handling against the exact `Not Found` rule; confirmed all registered placeholders are exercised with absent facts and the malformed-package CLI fallback is covered.

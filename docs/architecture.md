@@ -2,7 +2,7 @@
 
 ## Overview
 
-The approved scope is a local Node.js CLI that converts a placeholder-based Markdown template into a technical profile using only explicitly permitted facts from a repository checkout. The architecture separates argument and file orchestration, repository reading, placeholder-to-fact decisions, and rendering. Unverifiable values resolve to the literal `Not Found`; the CLI does not infer facts or call remote services. These boundaries implement requirements FR-1 through FR-5 and NFR-1 through NFR-2. Module names and descriptions below follow `config/app-profile.yml`.
+The approved scope is a local Node.js CLI that converts a placeholder-based Markdown template into a technical profile using only explicitly permitted facts from a repository checkout. The architecture separates argument and file orchestration, repository reading, placeholder-to-fact decisions, and rendering. Unverifiable values resolve to the literal `Not Found`; the CLI does not infer facts or call remote services. These boundaries implement requirements FR-1 through FR-6 and NFR-1 through NFR-3. Approved scope also includes exactly 40 passing tests, self-sync generation of `TECHNICAL_PROFILE.md` with 8 of 15 fields, and supporting `.github` agent/skill/hook and `docs/` artifacts. These governance and documentation files support the workflow but do not participate in the CLI runtime data flow. Out of scope are network or remote calls, reading source beyond `package.json`, `README.md`, and existence-only checks of the five named entrypoint candidates, new runtime dependencies, and publishing or Jira/PR writes without explicit approval. Module names and descriptions below follow `config/app-profile.yml`.
 
 ## Components and Responsibilities
 
@@ -34,7 +34,7 @@ flowchart LR
 
 ## Data Flow
 
-1. The CLI receives `<repoPath> <templatePath> <outputPath> [--json]` and checks required arguments and template/output path collision (FR-5).
+1. The CLI receives `<repoPath> <templatePath> <outputPath> [--json]`; missing required arguments produce usage and exit 1 (a JSON error in JSON mode), and template/output paths resolving to the same location are rejected before writing with the specified message and exit 1 (FR-5). Other invalid/missing path behavior is out of scope.
 2. The template engine identifies tokens in the Markdown template; the scanner reads only permitted local repository sources (FR-1, FR-2).
 3. The fact mapper pairs tokens with supported observations. Missing, malformed, unreadable, unsupported, or unknown facts remain unverified and become the exact `Not Found` value (FR-3).
 4. The template engine renders the Markdown. The CLI writes the output file and reports the found/total count in plain mode, or returns the rendered document and counts in the requested JSON object (FR-1, FR-4).
@@ -47,6 +47,7 @@ flowchart LR
 - **Markdown template and local file output:** keeps generated content reviewable and within the approved local-only scope (FR-1).
 - **Structured JSON as an optional CLI presentation:** provides machine-readable status and rendered content without changing the Markdown file deliverable (FR-4).
 - **Explicit source and mapping boundary:** observed inputs are distinguished from mapping policy; unavailable evidence is represented as `Not Found`, not guessed (FR-2, FR-3).
+- **Verification baseline:** `npm test` must pass exactly 40 tests with zero failures; the self-sync command must generate `TECHNICAL_PROFILE.md` with 8 of 15 fields found (AC-7, AC-8; NFR-3).
 
 ## Risks
 
