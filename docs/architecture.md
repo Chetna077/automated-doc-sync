@@ -15,6 +15,23 @@ The approved scope is a local Node.js CLI that converts a placeholder-based Mark
 
 The module boundaries are intentionally one-way: CLI orchestration coordinates the work; the scanner reads repository facts; the mapper decides which observed facts support each token; the template engine renders text. This keeps filesystem access out of the mapping/rendering responsibilities and gives each requirement a clear architectural owner.
 
+### Component diagram
+
+```mermaid
+flowchart LR
+    USER(["User / CI"]) -->|"repoPath, templatePath, outputPath, --json"| CLI["src/index.js<br/>CLI orchestration"]
+    CLI --> TE["src/templateEngine.js<br/>find tokens, render Markdown"]
+    CLI --> SC["src/scanner.js<br/>read permitted facts"]
+    CLI --> FM["src/factMapper.js<br/>match tokens to verified facts"]
+    SC -->|"read only"| PKG[("package.json")]
+    SC -->|"read only"| RM[("README.md")]
+    SC -->|"existence check only"| EP[("entry-point files")]
+    SC -->|"raw facts"| FM
+    FM -->|"mapped values or Not Found"| TE
+    TE -->|"rendered Markdown"| OUT[("output file / JSON result")]
+    CLI -.->|"refuses output == template"| OUT
+```
+
 ## Data Flow
 
 1. The CLI receives `<repoPath> <templatePath> <outputPath> [--json]` and checks required arguments and template/output path collision (FR-5).
