@@ -1,0 +1,16 @@
+# Implementation Plan - SCRUM-1
+| # | Task | Depends on | Blocked? | Status |
+|---|------|-----------|----------|--------|
+| 1 | Update the approved SDLC docs to reflect final intake scope and trace requirements to the existing app profile: requirements, architecture, design review, and this plan. Keep all other path behavior out of scope and do not invent unspecified JSON-error schema or operational error text. | Intake, architecture, design-review approvals | No | Complete - documents approved through design review; plan awaits approval |
+| 2 | Inspect only the in-scope implementation and test files needed to compare behavior with the approved requirements; use `config/app-profile.yml` as the sole source of app facts. Do not broaden source discovery or infer behavior. | 1 | No | Not started |
+| 3 | Implement the four scoped CLI modules (`src/index.js`, `src/scanner.js`, `src/factMapper.js`, `src/templateEngine.js`) to satisfy FR-1 through FR-6 and AC-1 through AC-7: permitted source reads only, ordered existence-only entrypoint candidates, exact `Not Found` fallback, JSON success payload, required-argument behavior, same-path protection, and configured self-sync. Preserve local-only execution and zero runtime dependencies. | 2 | No | Not started |
+| 4 | Add or adjust focused tests for the specified happy paths and edge cases, including all-placeholder fallback, package/README provenance, candidate priority without reading candidate contents, missing arguments in plain/JSON modes, path collision, and self-sync output. Meet AC-8 exactly: 40 tests pass with 0 failures; do not weaken tests merely to hit the count. | 3 | No | Not started |
+| 5 | Update scoped `.github` agent, skill, and hook files and `docs/` artifacts as needed so the approved pipeline scope, approval gates, skill evidence, token-saving, and tests are consistent. No remote write, PR, or commit is included. | 1, 3, 4 | No | Not started |
+| 6 | Run `npm run sync:self` and confirm `TECHNICAL_PROFILE.md` has 8 / 15 fields found and no unsupported guesses (AC-7). | 3, 4 | No | Not started |
+| 7 | Run `npm test` and confirm exactly 40 tests with zero failures; report real output and any environment-related skips/failures transparently. Confirm zero runtime dependencies and Node.js >=18 from `config/app-profile.yml` (AC-8, NFR-2, NFR-3). | 4, 5, 6 | No | Not started |
+| 8 | Review the local implementation and documentation against the approved requirements, including bounded reads, no network/remote behavior, no entrypoint-content reads, no guessing, and no template overwrite. Keep review findings for the later code-review stage. | 3-7 | No | Not started |
+| 9 | After the user approves the implementation plan, proceed to Build; later stop at separate Review and Verify approval gates. Publish or write to Jira/Confluence/GitHub, open a PR, or commit only after explicit user approval at publish. | 8 and required stage approvals | No | Not started |
+
+## Skills applied
+
+- not-found-policy: Checked that planned implementation and test tasks preserve the explicit source allowlist, forbid inference, and verify exact `Not Found` behavior; all unknown operational path cases remain out of scope.

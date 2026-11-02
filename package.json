@@ -1,0 +1,17 @@
+{
+  "name": "automated-doc-sync",
+  "version": "1.0.0",
+  "description": "Keeps a repo's technical profile documentation in sync with its real code, marking anything unverifiable as Not Found instead of guessing.",
+  "main": "src/index.js",
+  "bin": {
+    "doc-sync": "src/index.js"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "sync:self": "node src/index.js . templates/technical-app-manifest.md TECHNICAL_PROFILE.md"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}
