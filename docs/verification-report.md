@@ -1,5 +1,7 @@
 # Verification Report - SCRUM-1
 
+<!-- test-count: 40 -->
+
 ## Result
 
 **PASS** - verification meets the approved test and self-sync criteria. No external systems or publishing actions were used.
